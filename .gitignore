@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Secrets — never commit the real .env
+.env
+
+# Reports are ephemeral; the routine re-generates them each run
+output_reports/
+
+# buzz_mentions.db is intentionally tracked so the routine can commit
+# updated mention history back to the repo between nightly runs.
+# Do NOT add it here.
