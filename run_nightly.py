@@ -19,7 +19,7 @@ from pathlib import Path
 import config
 from analyzer import buzz_detector, technical
 from db.store import MentionStore
-from reports import emailer, formatter
+from reports import emailer, formatter, html_formatter
 from scrapers import reddit_scraper, stocktwits_scraper
 
 logging.basicConfig(
@@ -80,15 +80,17 @@ def main() -> int:
         )
 
     report = formatter.build_report(today, rows)
+    html_report = html_formatter.build_html_report(today, rows)
     print(report)
 
     report_dir = Path(config.REPORT_DIR)
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / f"buzz_report_{today}.txt"
     report_path.write_text(report)
-    log.info("Report saved to %s", report_path)
+    (report_dir / f"buzz_report_{today}.html").write_text(html_report)
+    log.info("Reports saved to %s", report_dir)
 
-    emailer.send_report(today, report)
+    emailer.send_report(today, report, html_report)
 
     log.info("Done — %d tickers flagged", len(rows))
     return 0

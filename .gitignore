@@ -1,8 +1,8 @@
+# NOTE: db/mentions.sqlite3 and reports/output/ are deliberately COMMITTED.
+# Nightly Routine runs happen in fresh ephemeral containers, so the 30-day
+# mention baseline (and report history) must persist through the repo.
 .env
 __pycache__/
 *.pyc
-*.sqlite3
-db/*.sqlite3
-reports/output/
 .venv/
 venv/

@@ -19,7 +19,10 @@ from 8 to 60 is signal.
 4. **Confirm** — flagged tickers get RSI(21) on the daily timeframe via
    yfinance (free, no API key) and a combined signal:
    `BUZZ + OVERSOLD`, `BUZZ + NEUTRAL`, `BUZZ + OVERBOUGHT`, etc.
-5. **Report** — plain-text table saved to `reports/output/` and emailed via SMTP.
+5. **Report** — saved to `reports/output/` as both `.txt` and a styled `.html`
+   page, then emailed via SMTP to every address in `EMAIL_TO` (comma-separated).
+   The email carries a plain-text fallback, the styled HTML as the message body,
+   and the same HTML attached as a file recipients can open in a browser.
 
 ### Sample report
 
@@ -61,15 +64,34 @@ The first ~5 runs only build baseline history; flagging starts once a ticker
 has enough prior days (`MIN_HISTORY_DAYS`, default 5) and improves as the
 window fills to 30 days.
 
-## Cron (nightly, ~8pm ET on trading-day eves Mon–Thu)
+## Scheduling
+
+### Option A — Claude Code Routine (managed, no server needed)
+
+A Routine (scheduled trigger) in Claude Code on the web fires a fresh cloud
+session on a cron schedule. Each session clones this repo, checks out the
+working branch, runs `run_nightly.py`, then commits the updated
+`db/mentions.sqlite3` and `reports/output/` back — that commit IS the
+persistence layer, since Routine containers are ephemeral.
+
+Requirements:
+- Credentials (`REDDIT_*`, `SMTP_*`, `EMAIL_*`) must be set as **environment
+  variables on the Claude Code environment** (claude.ai → Claude Code →
+  Environments → your environment → Environment variables). `config.py` reads
+  plain environment variables, so no `.env` file is needed in the cloud.
+- The environment's network policy must allow reddit.com, stocktwits.com,
+  Yahoo Finance, and your SMTP host.
+
+Docs: <https://code.claude.com/docs/en/claude-code-on-the-web>
+
+### Option B — classic cron on your own machine
 
 ```cron
 CRON_TZ=America/New_York
-0 20 * * 1-4 cd /path/to/STOCKS && .venv/bin/python run_nightly.py >> cron.log 2>&1
+0 20 * * * cd /path/to/STOCKS && .venv/bin/python run_nightly.py >> cron.log 2>&1
 ```
 
-(Sunday night is skipped by default since Monday-eve buzz accumulates over the
-weekend; add `0` to the day-of-week list if you want it.)
+Use `1-4` as the day-of-week field to restrict to trading-day eves (Mon–Thu).
 
 ## Project structure
 
@@ -89,7 +111,8 @@ STOCKS/
 │   └── technical.py           # RSI(21) via yfinance
 └── reports/
     ├── formatter.py           # builds the text report table
-    └── emailer.py             # SMTP send
+    ├── html_formatter.py      # styled HTML report (email body + attachment)
+    └── emailer.py             # SMTP multipart send (text + HTML + .html file)
 ```
 
 ## Configuration
