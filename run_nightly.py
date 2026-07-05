@@ -20,7 +20,7 @@ import config
 from analyzer import buzz_detector, technical
 from db.store import MentionStore
 from reports import emailer, formatter, html_formatter
-from scrapers import reddit_scraper, stocktwits_scraper
+from scrapers import apewisdom_scraper, reddit_scraper, stocktwits_scraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,11 +33,21 @@ def scrape_all() -> dict[str, dict[str, int]]:
     """Run every scraper, tolerating individual failures."""
     results: dict[str, dict[str, int]] = {}
 
-    try:
-        results["reddit"] = dict(reddit_scraper.scrape())
-        log.info("Reddit: %d tickers mentioned", len(results["reddit"]))
-    except Exception:
-        log.exception("Reddit scrape failed")
+    if config.REDDIT_CLIENT_ID and config.REDDIT_CLIENT_SECRET:
+        try:
+            results["reddit"] = dict(reddit_scraper.scrape())
+            log.info("Reddit: %d tickers mentioned", len(results["reddit"]))
+        except Exception:
+            log.exception("Reddit scrape failed")
+    else:
+        log.info("Reddit API credentials not set — skipping direct Reddit scrape")
+
+    if config.APEWISDOM_ENABLED:
+        try:
+            results["apewisdom"] = dict(apewisdom_scraper.scrape())
+            log.info("ApeWisdom: %d tickers mentioned", len(results["apewisdom"]))
+        except Exception:
+            log.exception("ApeWisdom scrape failed")
 
     try:
         results["stocktwits"] = dict(stocktwits_scraper.scrape())

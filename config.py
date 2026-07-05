@@ -29,6 +29,12 @@ SUBREDDITS = _env_list(
 REDDIT_POST_LIMIT = int(_env("REDDIT_POST_LIMIT", "100"))
 REDDIT_COMMENTS_PER_POST = int(_env("REDDIT_COMMENTS_PER_POST", "50"))
 
+# ── ApeWisdom (keyless Reddit-mentions aggregator) ────────────────────────────
+APEWISDOM_ENABLED = _env("APEWISDOM_ENABLED", "true").lower() in ("1", "true", "yes")
+# "all-stocks" aggregates the major investing subreddits; see apewisdom.io/api
+APEWISDOM_FILTER = _env("APEWISDOM_FILTER", "all-stocks")
+APEWISDOM_SLEEP = float(_env("APEWISDOM_SLEEP", "0.5"))
+
 # ── StockTwits ────────────────────────────────────────────────────────────────
 STOCKTWITS_SLEEP = float(_env("STOCKTWITS_SLEEP", "0.5"))
 STOCKTWITS_RATE_LIMIT_BACKOFF = float(_env("STOCKTWITS_RATE_LIMIT_BACKOFF", "60"))

@@ -162,7 +162,7 @@ def build_html_report(date: str, rows: list[dict]) -> str:
         <tr>
           <td style="padding:18px 4px 0;">
             <div style="font-size:12px; color:#898781; line-height:1.6;">
-              Sources: Reddit (r/wallstreetbets, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket) &middot; StockTwits<br>
+              Sources: Reddit mentions (r/wallstreetbets, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket &mdash; direct API and/or ApeWisdom aggregate) &middot; StockTwits<br>
               RSI: {config.RSI_PERIOD}-period daily via yfinance &middot; Baseline: {config.BASELINE_DAYS}-day rolling mean/std, today excluded &middot; Min {config.MIN_HISTORY_DAYS} days history<br>
               Zones: &lt;30 OVERSOLD &middot; 30&ndash;40 WEAK &middot; 40&ndash;60 NEUTRAL &middot; 60&ndash;70 STRONG &middot; &gt;70 OVERBOUGHT<br>
               Automated research signal &mdash; not investment advice.

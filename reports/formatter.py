@@ -36,8 +36,9 @@ def build_report(date: str, rows: list[dict]) -> str:
 
     lines += [
         "",
-        "Sources: Reddit (WSB, r/stocks, r/investing, r/options, "
-        "r/pennystocks, r/stockmarket), StockTwits",
+        "Sources: Reddit mentions (WSB, r/stocks, r/investing, r/options, "
+        "r/pennystocks, r/stockmarket — direct API and/or ApeWisdom aggregate), "
+        "StockTwits",
         f"RSI: {config.RSI_PERIOD}-period daily | "
         f"Baseline: {config.BASELINE_DAYS}-day rolling mean/std",
     ]

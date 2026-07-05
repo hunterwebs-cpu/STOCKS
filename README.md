@@ -7,10 +7,20 @@ from 8 to 60 is signal.
 
 ## How it works
 
-1. **Scrape** — Reddit (r/wallstreetbets, r/stocks, r/investing, r/options,
-   r/pennystocks, r/stockmarket) via PRAW, plus the StockTwits public API.
-   `$TICKER` cashtags are extracted from post titles, bodies, and the top 50
-   comments per post, with a blacklist for false positives (CEO, IPO, USD, …).
+1. **Scrape** — three sources, best-effort (any subset can fail without
+   killing the run):
+   - **ApeWisdom** (keyless): aggregated Reddit ticker mentions across the
+     major investing subreddits — works with zero credentials, and is the
+     Reddit signal while direct API access is pending.
+   - **Reddit direct** via PRAW (r/wallstreetbets, r/stocks, r/investing,
+     r/options, r/pennystocks, r/stockmarket): `$TICKER` cashtags from post
+     titles, bodies, and top 50 comments per post, with a false-positive
+     blacklist (CEO, IPO, USD, …). Runs only when `REDDIT_CLIENT_ID`/`SECRET`
+     are set — note Reddit now gates API app creation behind its
+     [Responsible Builder Policy](https://support.reddithelp.com/hc/en-us/articles/42728983564564-Responsible-Builder-Policy)
+     registration/approval.
+   - **StockTwits** public API (keyless): trending symbols + per-symbol
+     message streams.
 2. **Store** — daily mention counts per ticker land in SQLite (`db/mentions.sqlite3`).
 3. **Detect** — once a rolling baseline builds up, each ticker gets a z-score:
    `z = (today_mentions − 30d_mean) / 30d_std` (baseline excludes today).
@@ -51,8 +61,17 @@ pip install -r requirements.txt
 cp .env.example .env   # then fill in Reddit API + SMTP credentials
 ```
 
-Reddit credentials: create a "script" app at <https://www.reddit.com/prefs/apps>.
-StockTwits and yfinance need no keys.
+ApeWisdom, StockTwits, and yfinance need no keys — the screener is fully
+functional without any credentials except SMTP for email delivery.
+
+Reddit direct access (optional, adds depth): Reddit requires developer
+registration and approval before an app can be created ("I'm a Developer" →
+"I want to register to use the Reddit API" via the
+[Developer Platform & Accessing Reddit Data](https://support.reddithelp.com/hc/en-us/articles/14945211791892-Developer-Platform-Accessing-Reddit-Data)
+page). Once approved, create a "script" app at <https://www.reddit.com/prefs/apps>
+and set `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT`.
+Adding a new source mid-stream shifts total mention levels, so expect z-scores
+to run a bit hot for a few days while the baseline adapts.
 
 ## Run
 
@@ -104,7 +123,8 @@ STOCKS/
 ├── db/
 │   └── store.py               # SQLite: upsert mentions, query history
 ├── scrapers/
-│   ├── reddit_scraper.py      # PRAW, extracts $TICKER cashtags
+│   ├── reddit_scraper.py      # PRAW, extracts $TICKER cashtags (needs API approval)
+│   ├── apewisdom_scraper.py   # keyless Reddit-mentions aggregate
 │   └── stocktwits_scraper.py  # public API, trending + per-symbol
 ├── analyzer/
 │   ├── buzz_detector.py       # z-score engine, flags >= 1.2σ
