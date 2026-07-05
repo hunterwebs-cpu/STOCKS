@@ -54,6 +54,8 @@ def detect(store: MentionStore, date: str) -> list[BuzzHit]:
 
     hits: list[BuzzHit] = []
     for ticker, today in today_counts.items():
+        if today < config.MIN_MENTIONS_TODAY:
+            continue
         history = store.history(ticker, baseline_dates)
 
         # Require the ticker itself to have some track record so a

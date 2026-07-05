@@ -13,8 +13,9 @@ Run via cron ~8pm ET on trading-day eves (see README).
 
 import logging
 import sys
-from datetime import date
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import config
 from analyzer import buzz_detector, technical
@@ -27,6 +28,12 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 log = logging.getLogger("run_nightly")
+
+
+def today_eastern():
+    """Report date in US Eastern time, so the ~8pm ET run is labeled with
+    the evening's date regardless of the container's (UTC) clock."""
+    return datetime.now(ZoneInfo("America/New_York")).date()
 
 
 def scrape_all() -> dict[str, dict[str, int]]:
@@ -59,7 +66,7 @@ def scrape_all() -> dict[str, dict[str, int]]:
 
 
 def main() -> int:
-    today = date.today().isoformat()
+    today = today_eastern().isoformat()
     log.info("Nightly buzz screener starting for %s", today)
 
     source_counts = scrape_all()

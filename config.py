@@ -43,6 +43,9 @@ STOCKTWITS_RATE_LIMIT_BACKOFF = float(_env("STOCKTWITS_RATE_LIMIT_BACKOFF", "60"
 Z_SCORE_THRESHOLD = float(_env("Z_SCORE_THRESHOLD", "1.2"))
 BASELINE_DAYS = int(_env("BASELINE_DAYS", "30"))
 MIN_HISTORY_DAYS = int(_env("MIN_HISTORY_DAYS", "5"))
+# Ignore tickers with fewer total mentions than this today — keeps 2-3 mention
+# micro-noise out of the report, especially while the baseline is still short.
+MIN_MENTIONS_TODAY = int(_env("MIN_MENTIONS_TODAY", "10"))
 
 # ── Technicals ────────────────────────────────────────────────────────────────
 RSI_PERIOD = int(_env("RSI_PERIOD", "21"))
