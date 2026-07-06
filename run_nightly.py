@@ -5,7 +5,7 @@ Pipeline:
     1. Scrape Reddit + StockTwits for today's ticker mention counts
     2. Persist counts to SQLite (per source, upsert-safe on re-run)
     3. Z-score today's counts against each ticker's 30-day baseline
-    4. Pull RSI(21) for every flagged ticker via yfinance
+    4. Pull RSI(21) for every flagged ticker via the Yahoo Finance chart API
     5. Write the report to reports/output/ and email it via SMTP
 
 Run via cron ~8pm ET on trading-day eves (see README).

@@ -27,7 +27,7 @@ from 8 to 60 is signal.
    Anything at `z ≥ 1.2` (configurable) is flagged. A ticker needs at least
    5 prior days of history before it can be flagged.
 4. **Confirm** — flagged tickers get RSI(21) on the daily timeframe via
-   yfinance (free, no API key) and a combined signal:
+   the Yahoo Finance chart API (free, no key) and a combined signal:
    `BUZZ + OVERSOLD`, `BUZZ + NEUTRAL`, `BUZZ + OVERBOUGHT`, etc.
 5. **Report** — saved to `reports/output/` as both `.txt` and a styled `.html`
    page, then emailed via SMTP to every address in `EMAIL_TO` (comma-separated).
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 cp .env.example .env   # then fill in Reddit API + SMTP credentials
 ```
 
-ApeWisdom, StockTwits, and yfinance need no keys — the screener is fully
+ApeWisdom, StockTwits, and Yahoo Finance need no keys — the screener is fully
 functional without any credentials except SMTP for email delivery.
 
 Reddit direct access (optional, adds depth): Reddit requires developer
@@ -128,7 +128,7 @@ STOCKS/
 │   └── stocktwits_scraper.py  # public API, trending + per-symbol
 ├── analyzer/
 │   ├── buzz_detector.py       # z-score engine, flags >= 1.2σ
-│   └── technical.py           # RSI(21) via yfinance
+│   └── technical.py           # RSI(21) via Yahoo Finance chart API
 └── reports/
     ├── formatter.py           # builds the text report table
     ├── html_formatter.py      # styled HTML report (email body + attachment)

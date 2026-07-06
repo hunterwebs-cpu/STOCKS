@@ -1,5 +1,4 @@
 praw>=7.7
-yfinance>=0.2.40
 requests>=2.31
 numpy>=1.26
 python-dotenv>=1.0
