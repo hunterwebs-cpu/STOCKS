@@ -5,12 +5,13 @@ Pulls the trending-symbols list, then counts messages posted in the last
 and backs off on HTTP 429.
 """
 
+import json
 import logging
 import time
+import urllib.error
+import urllib.request
 from collections import Counter
 from datetime import datetime, timedelta, timezone
-
-import requests
 
 import config
 
@@ -21,27 +22,29 @@ HEADERS = {"User-Agent": "buzz-screener/1.0"}
 
 
 def _get(url: str, retries: int = 1) -> dict | None:
-    """GET with a single 60s-backoff retry on 429 rate limiting."""
+    """GET with a single 60s-backoff retry on 429 rate limiting.
+
+    Uses urllib rather than requests: StockTwits' bot filtering 403s the
+    requests library's client fingerprint but accepts urllib and curl.
+    """
     for attempt in range(retries + 1):
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=15)
-        except requests.RequestException:
-            log.exception("Request failed: %s", url)
-            return None
-        if resp.status_code == 429:
-            if attempt < retries:
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 429 and attempt < retries:
                 log.warning(
                     "Rate limited by StockTwits, backing off %.0fs",
                     config.STOCKTWITS_RATE_LIMIT_BACKOFF,
                 )
                 time.sleep(config.STOCKTWITS_RATE_LIMIT_BACKOFF)
                 continue
-            log.error("Still rate limited after backoff: %s", url)
+            log.warning("StockTwits returned %d for %s", exc.code, url)
             return None
-        if resp.status_code != 200:
-            log.warning("StockTwits returned %d for %s", resp.status_code, url)
+        except Exception:
+            log.exception("Request failed: %s", url)
             return None
-        return resp.json()
     return None
 
 
