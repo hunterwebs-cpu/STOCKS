@@ -1,0 +1,11 @@
+NIGHTLY BUZZ REPORT — 2026-07-05
+============================================================
+Stocks with social mention spike >= 1.2σ above 30-day baseline
+Total flagged: 0
+
+TICKER   Z-SCORE    MENTIONS   30D AVG    RSI(21)    RSI ZONE     SIGNAL
+------------------------------------------------------------------------
+(no tickers flagged tonight)
+
+Sources: Reddit mentions (WSB, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket — direct API and/or ApeWisdom aggregate), StockTwits
+RSI: 21-period daily | Baseline: 30-day rolling mean/std

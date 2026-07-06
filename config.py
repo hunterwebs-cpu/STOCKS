@@ -56,6 +56,9 @@ REPORT_DIR = _env("REPORT_DIR", str(BASE_DIR / "reports" / "output"))
 
 # ── Email ─────────────────────────────────────────────────────────────────────
 EMAIL_ENABLED = _env("EMAIL_ENABLED", "true").lower() in ("1", "true", "yes")
+# Brevo HTTPS API key — required in Claude Code cloud (SMTP ports are blocked
+# there); when set it takes priority over SMTP.
+BREVO_API_KEY = _env("BREVO_API_KEY")
 SMTP_HOST = _env("SMTP_HOST")
 SMTP_PORT = int(_env("SMTP_PORT", "587"))
 SMTP_USER = _env("SMTP_USER")
