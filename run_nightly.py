@@ -13,7 +13,7 @@ Run via cron ~8pm ET on trading-day eves (see README).
 
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -67,7 +67,11 @@ def scrape_all() -> dict[str, dict[str, int]]:
 
 def main() -> int:
     today = today_eastern().isoformat()
-    log.info("Nightly buzz screener starting for %s", today)
+    # Runs fire ~1am ET, after the trading-day-eve buzz already happened —
+    # so the report is labeled with the date the data is actually about
+    # (the evening before this run), not the run's own calendar date.
+    data_date = (today_eastern() - timedelta(days=1)).isoformat()
+    log.info("Nightly buzz screener starting for %s (data for %s)", today, data_date)
 
     source_counts = scrape_all()
     if not source_counts:
@@ -91,6 +95,10 @@ def main() -> int:
                      len(tracked), trade_date)
 
         hits = buzz_detector.detect(store, today)
+        movers = buzz_detector.top_movers(
+            store, today, n=config.TOP_MOVERS_COUNT,
+            min_mentions=config.TOP_MOVERS_MIN_MENTIONS,
+        )
         sv_history = {
             h.ticker: store.short_volume_history(h.ticker) for h in hits
         }
@@ -127,18 +135,34 @@ def main() -> int:
             }
         )
 
-    report = formatter.build_report(today, rows)
-    html_report = html_formatter.build_html_report(today, rows)
+    flagged_tickers = {h.ticker for h in hits}
+    mover_rows = [
+        {
+            "ticker": m.ticker,
+            "mentions": m.mentions,
+            "baseline_avg": m.baseline_avg,
+            "z_score": m.z_score,
+            "pct_change": (
+                round((m.mentions - m.baseline_avg) / m.baseline_avg * 100, 0)
+                if m.baseline_avg > 0 else None
+            ),
+            "flagged": m.ticker in flagged_tickers,
+        }
+        for m in movers
+    ]
+
+    report = formatter.build_report(data_date, rows, mover_rows)
+    html_report = html_formatter.build_html_report(data_date, rows, mover_rows)
     print(report)
 
     report_dir = Path(config.REPORT_DIR)
     report_dir.mkdir(parents=True, exist_ok=True)
-    report_path = report_dir / f"buzz_report_{today}.txt"
+    report_path = report_dir / f"buzz_report_{data_date}.txt"
     report_path.write_text(report)
-    (report_dir / f"buzz_report_{today}.html").write_text(html_report)
+    (report_dir / f"buzz_report_{data_date}.html").write_text(html_report)
     log.info("Reports saved to %s", report_dir)
 
-    emailer.send_report(today, report, html_report)
+    emailer.send_report(data_date, report, html_report)
 
     log.info("Done — %d tickers flagged", len(rows))
     return 0

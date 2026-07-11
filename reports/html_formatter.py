@@ -127,7 +127,77 @@ def _table(rows: list[dict]) -> str:
         </table>"""
 
 
-def build_html_report(date: str, rows: list[dict]) -> str:
+def _mover_row(m: dict, last: bool) -> str:
+    border = "" if last else "border-bottom:1px solid #e1e0d9;"
+    pct = m.get("pct_change")
+    pct_str = f"{pct:+.0f}%" if pct is not None else "&mdash;"
+    flag_html = (
+        '<span style="color:#a32d2d; font-weight:600;">&#9733; flagged</span>'
+        if m.get("flagged") else '<span style="color:#c3c2b7;">&mdash;</span>'
+    )
+    return f"""
+          <tr>
+            <td class="ink" style="padding:10px 10px; {border} font-size:14px; font-weight:700; color:#0b0b0b;">{html.escape(m['ticker'])}</td>
+            <td class="ink" style="padding:10px 10px; {border} font-size:13px; color:#0b0b0b; {_MONO_NUM} text-align:right;">{m['mentions']}</td>
+            <td class="sub" style="padding:10px 10px; {border} font-size:13px; color:#52514e; {_MONO_NUM} text-align:right;">{m['baseline_avg']:.1f}</td>
+            <td class="ink" style="padding:10px 10px; {border} font-size:13px; font-weight:600; color:#0b0b0b; {_MONO_NUM} text-align:right;">{pct_str}</td>
+            <td class="ink" style="padding:10px 10px; {border} font-size:13px; color:#0b0b0b; {_MONO_NUM} text-align:right;">{m['z_score']:.2f}&sigma;</td>
+            <td style="padding:10px 10px; {border} font-size:12px; text-align:right;">{flag_html}</td>
+          </tr>"""
+
+
+def _movers_table(movers: list[dict]) -> str:
+    if not movers:
+        return """
+        <div style="padding:24px 20px; text-align:center;">
+          <div class="sub" style="font-size:13px; color:#52514e;">
+            Not enough baseline history yet to rank movers &mdash; check back tomorrow.
+          </div>
+        </div>"""
+    header_cells = "".join(
+        f'<td style="padding:8px 10px; font-size:10px; font-weight:600; '
+        f'letter-spacing:0.6px; color:#898781; text-transform:uppercase; '
+        f'border-bottom:1px solid #c3c2b7; text-align:{align}; white-space:nowrap;">{name}</td>'
+        for name, align in [
+            ("Ticker", "left"), ("Mentions", "right"), ("Baseline avg", "right"),
+            ("Change", "right"), ("Z-score", "right"), ("", "right"),
+        ]
+    )
+    body = "".join(_mover_row(m, i == len(movers) - 1) for i, m in enumerate(movers))
+    return f"""
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr>{header_cells}</tr>
+          {body}
+        </table>"""
+
+
+_KEY_ROWS = [
+    ("Z-SCORE", "How unusual today's mention count is vs. this ticker's own recent history, in standard deviations. 1.2+ is unusual, 3+ is rare."),
+    (f"RSI({config.RSI_PERIOD})", "Price momentum, 0&ndash;100. Below 30 = oversold (may be due for a bounce). Above 70 = overbought (may be due to pull back)."),
+    ("Short float %", "Percent of a company's tradeable shares currently sold short (bets the price will fall). Higher = more fuel for a squeeze if the price rises and shorts must buy back."),
+    ("DTC", "Days-to-cover: how many days of average trading volume it would take short-sellers to buy back all their borrowed shares. Higher = harder for shorts to exit quickly."),
+    ("Short trend &#9650;/&#9660;", "Whether daily short-selling activity (FINRA data) is rising or falling. Rising = shorts still piling in. Falling = shorts may be covering &mdash; itself a source of upward price pressure."),
+    ("&#128293; Squeeze watch", "Heavy social buzz + a high short float at the same time &mdash; the classic setup for a short squeeze: rising prices force short-sellers to buy back stock, pushing the price higher still, forcing more covering."),
+]
+
+
+def _key_section() -> str:
+    rows_html = "".join(
+        f"""
+        <tr>
+          <td class="ink" style="padding:8px 12px 8px 0; font-size:12px; font-weight:700; color:#0b0b0b; white-space:nowrap; vertical-align:top;">{term}</td>
+          <td class="sub" style="padding:8px 0; font-size:12px; color:#52514e; line-height:1.5;">{meaning}</td>
+        </tr>"""
+        for term, meaning in _KEY_ROWS
+    )
+    return f"""
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          {rows_html}
+        </table>"""
+
+
+def build_html_report(date: str, rows: list[dict], movers: list[dict] | None = None) -> str:
+    movers = movers or []
     top_z = f"{rows[0]['z_score']:.2f}&sigma;" if rows else "&mdash;"
     top_ticker = html.escape(rows[0]["ticker"]) if rows else ""
     n_squeeze = sum(1 for r in rows if r.get("squeeze"))
@@ -184,6 +254,33 @@ def build_html_report(date: str, rows: list[dict]) -> str:
         <tr>
           <td class="card" style="background:#fcfcfb; border:1px solid #e1e0d9; border-radius:10px; padding:6px 6px 2px;">
             {_table(rows)}
+          </td>
+        </tr>
+
+        <!-- Top movers -->
+        <tr>
+          <td style="padding:22px 4px 8px;">
+            <div class="ink" style="font-size:15px; font-weight:700; color:#0b0b0b;">Top {config.TOP_MOVERS_COUNT} Movers</div>
+            <div class="sub" style="font-size:12px; color:#52514e; padding-top:2px;">
+              Biggest deviation from each ticker's own baseline today &mdash; broader than the flagged list above, so there's always something to watch.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card" style="background:#fcfcfb; border:1px solid #e1e0d9; border-radius:10px; padding:6px 6px 2px;">
+            {_movers_table(movers)}
+          </td>
+        </tr>
+
+        <!-- Key / glossary -->
+        <tr>
+          <td style="padding:22px 4px 8px;">
+            <div class="ink" style="font-size:15px; font-weight:700; color:#0b0b0b;">Key &mdash; How to Read This Report</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card" style="background:#fcfcfb; border:1px solid #e1e0d9; border-radius:10px; padding:14px 16px;">
+            {_key_section()}
           </td>
         </tr>
 

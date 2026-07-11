@@ -46,6 +46,10 @@ MIN_HISTORY_DAYS = int(_env("MIN_HISTORY_DAYS", "5"))
 # Ignore tickers with fewer total mentions than this today — keeps 2-3 mention
 # micro-noise out of the report, especially while the baseline is still short.
 MIN_MENTIONS_TODAY = int(_env("MIN_MENTIONS_TODAY", "10"))
+# "Top Movers" radar: broader than the flagged list, shows something every
+# night even before MIN_HISTORY_DAYS is met.
+TOP_MOVERS_COUNT = int(_env("TOP_MOVERS_COUNT", "15"))
+TOP_MOVERS_MIN_MENTIONS = int(_env("TOP_MOVERS_MIN_MENTIONS", "5"))
 
 # ── Technicals ────────────────────────────────────────────────────────────────
 RSI_PERIOD = int(_env("RSI_PERIOD", "21"))

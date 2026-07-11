@@ -78,3 +78,51 @@ def detect(store: MentionStore, date: str) -> list[BuzzHit]:
     hits.sort(key=lambda h: h.z_score, reverse=True)
     log.info("Flagged %d tickers at z >= %.2f", len(hits), config.Z_SCORE_THRESHOLD)
     return hits
+
+
+@dataclass
+class Mover:
+    ticker: str
+    mentions: int
+    baseline_avg: float
+    z_score: float
+    baseline_days: int
+
+
+def top_movers(
+    store: MentionStore, date: str, n: int = 15, min_mentions: int = 5
+) -> list[Mover]:
+    """The N tickers with the biggest deviation from their own baseline today.
+
+    Unlike detect(), this skips MIN_HISTORY_DAYS and the z-score threshold —
+    it's a broad "what's moving" radar meant to show something meaningful
+    every night, even in the first week before the baseline is deep enough
+    for a ticker to formally flag.
+    """
+    today_counts = store.totals_for_date(date)
+    baseline_dates = store.baseline_dates(date, config.BASELINE_DAYS)
+    if not baseline_dates:
+        return []
+
+    movers: list[Mover] = []
+    for ticker, today in today_counts.items():
+        if today < min_mentions:
+            continue
+
+        first = store.first_seen(ticker)
+        if first is None or first >= date:
+            continue  # first-ever mention today — no baseline to compare
+
+        history = store.history(ticker, baseline_dates)
+        movers.append(
+            Mover(
+                ticker=ticker,
+                mentions=today,
+                baseline_avg=round(float(np.mean(history)), 1),
+                z_score=round(z_score(today, history), 2),
+                baseline_days=len(history),
+            )
+        )
+
+    movers.sort(key=lambda m: m.z_score, reverse=True)
+    return movers[:n]
