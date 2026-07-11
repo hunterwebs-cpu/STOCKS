@@ -18,7 +18,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import config
-from analyzer import buzz_detector, technical
+from analyzer import buzz_detector, short_interest, technical
 from db.store import MentionStore
 from reports import emailer, formatter, html_formatter
 from scrapers import apewisdom_scraper, reddit_scraper, stocktwits_scraper
@@ -74,16 +74,41 @@ def main() -> int:
         log.error("All scrapers failed — nothing to store, aborting")
         return 1
 
+    mentioned_today = set().union(*(c.keys() for c in source_counts.values()))
+
     with MentionStore(config.DB_PATH) as store:
         for source, counts in source_counts.items():
             store.upsert_mentions(today, source, counts)
 
+        # Daily FINRA short-volume ratios for every ticker we track — this
+        # history is what lets the report show covering-vs-pressing trends.
+        finra = short_interest.latest_short_volume()
+        if finra:
+            trade_date, ratios = finra
+            tracked = {t: r for t, r in ratios.items() if t in mentioned_today}
+            store.upsert_short_volume(trade_date, tracked)
+            log.info("Stored short-volume ratios for %d tracked tickers (%s)",
+                     len(tracked), trade_date)
+
         hits = buzz_detector.detect(store, today)
+        sv_history = {
+            h.ticker: store.short_volume_history(h.ticker) for h in hits
+        }
+
+    short_stats = short_interest.finviz_stats_bulk([h.ticker for h in hits])
 
     rows = []
     for hit in hits:
         rsi_val = technical.rsi(hit.ticker)
         zone = technical.rsi_zone(rsi_val)
+        stats = short_stats.get(hit.ticker, {})
+        short_float = stats.get("short_float_pct")
+        dtc = stats.get("days_to_cover")
+        squeeze = short_float is not None and (
+            short_float >= config.SQUEEZE_SHORT_FLOAT_PCT
+            or (short_float >= config.SQUEEZE_ALT_SHORT_FLOAT_PCT
+                and (dtc or 0) >= config.SQUEEZE_ALT_DTC)
+        )
         rows.append(
             {
                 "ticker": hit.ticker,
@@ -93,6 +118,12 @@ def main() -> int:
                 "rsi": rsi_val,
                 "rsi_zone": zone,
                 "signal": technical.signal_for_zone(zone),
+                "short_float": short_float,
+                "days_to_cover": dtc,
+                "sv_trend": short_interest.short_volume_trend(
+                    sv_history.get(hit.ticker, [])
+                ),
+                "squeeze": squeeze,
             }
         )
 

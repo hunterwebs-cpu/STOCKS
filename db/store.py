@@ -24,6 +24,13 @@ CREATE INDEX IF NOT EXISTS idx_mentions_ticker ON mentions (ticker, date);
 CREATE TABLE IF NOT EXISTS run_days (
     date TEXT PRIMARY KEY
 );
+
+CREATE TABLE IF NOT EXISTS short_volume (
+    date   TEXT NOT NULL,
+    ticker TEXT NOT NULL,
+    ratio  REAL NOT NULL,
+    PRIMARY KEY (date, ticker)
+);
 """
 
 
@@ -92,6 +99,25 @@ class MentionStore:
         )
         by_date = dict(rows.fetchall())
         return [by_date.get(d, 0) for d in dates]
+
+    def upsert_short_volume(self, date: str, ratios: dict[str, float]):
+        """Store daily FINRA short-volume ratios (keyed by FINRA trade date)."""
+        self.conn.executemany(
+            """
+            INSERT INTO short_volume (date, ticker, ratio) VALUES (?, ?, ?)
+            ON CONFLICT (date, ticker) DO UPDATE SET ratio = excluded.ratio
+            """,
+            [(date, t, r) for t, r in ratios.items()],
+        )
+        self.conn.commit()
+
+    def short_volume_history(self, ticker: str, days: int = 10) -> list[tuple[str, float]]:
+        rows = self.conn.execute(
+            "SELECT date, ratio FROM short_volume WHERE ticker = ? "
+            "ORDER BY date DESC LIMIT ?",
+            (ticker, days),
+        )
+        return rows.fetchall()
 
     def first_seen(self, ticker: str) -> str | None:
         row = self.conn.execute(

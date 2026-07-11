@@ -40,6 +40,27 @@ def _signal_note(signal: str) -> str:
     return signal.split("—", 1)[1].strip() if "—" in signal else signal
 
 
+def _squeeze_chip() -> str:
+    return (
+        '<span style="display:inline-block; padding:3px 10px; border-radius:999px; '
+        'background:#d03b3b; color:#ffffff; font-size:11px; font-weight:700; '
+        'letter-spacing:0.5px; white-space:nowrap;">&#128293; SQUEEZE WATCH</span>'
+    )
+
+
+def _short_cell(r: dict) -> str:
+    sf = r.get("short_float")
+    if sf is None:
+        return '<span style="color:#898781;">&mdash;</span>'
+    trend = r.get("sv_trend")
+    arrow = ""
+    if trend is not None and trend >= 0.02:
+        arrow = ' <span style="color:#a32d2d; font-size:11px;" title="short volume rising">&#9650;</span>'
+    elif trend is not None and trend <= -0.02:
+        arrow = ' <span style="color:#0ca30c; font-size:11px;" title="short volume falling — covering?">&#9660;</span>'
+    return f'<span class="ink" style="color:#0b0b0b;">{sf:.1f}%</span>{arrow}'
+
+
 def _kpi(label: str, value: str, sub: str = "") -> str:
     sub_html = (
         f'<div style="font-size:12px; color:#898781; padding-top:2px;">{sub}</div>'
@@ -56,18 +77,25 @@ def _kpi(label: str, value: str, sub: str = "") -> str:
 
 def _row(r: dict, last: bool) -> str:
     rsi_str = f"{r['rsi']:.1f}" if r["rsi"] is not None else "—"
+    dtc = r.get("days_to_cover")
+    dtc_str = f"{dtc:.1f}" if dtc is not None else "&mdash;"
     border = "" if last else "border-bottom:1px solid #e1e0d9;"
+    signal_html = html.escape(_signal_note(r["signal"]))
+    if r.get("squeeze"):
+        signal_html = f'{_squeeze_chip()}<br><span style="font-size:12px;">{signal_html}</span>'
     return f"""
           <tr>
-            <td class="ink" style="padding:12px 14px; {border} font-size:15px; font-weight:700; color:#0b0b0b;">{html.escape(r['ticker'])}</td>
-            <td class="ink" style="padding:12px 14px; {border} font-size:14px; font-weight:650; color:#0b0b0b; {_MONO_NUM} text-align:right;">{r['z_score']:.2f}&sigma;</td>
-            <td style="padding:12px 14px; {border} {_MONO_NUM} text-align:right; white-space:nowrap;">
+            <td class="ink" style="padding:12px 10px; {border} font-size:15px; font-weight:700; color:#0b0b0b;">{html.escape(r['ticker'])}</td>
+            <td class="ink" style="padding:12px 10px; {border} font-size:14px; font-weight:650; color:#0b0b0b; {_MONO_NUM} text-align:right;">{r['z_score']:.2f}&sigma;</td>
+            <td style="padding:12px 10px; {border} {_MONO_NUM} text-align:right; white-space:nowrap;">
               <span class="ink" style="font-size:14px; color:#0b0b0b;">{r['mentions']}</span>
               <span style="font-size:12px; color:#898781;">&nbsp;vs {r['baseline_avg']:.1f} avg</span>
             </td>
-            <td class="ink" style="padding:12px 14px; {border} font-size:14px; color:#0b0b0b; {_MONO_NUM} text-align:right;">{rsi_str}</td>
-            <td style="padding:12px 14px; {border} text-align:center;">{_chip(r['rsi_zone'])}</td>
-            <td class="sub" style="padding:12px 14px; {border} font-size:13px; color:#52514e;">{html.escape(_signal_note(r['signal']))}</td>
+            <td class="ink" style="padding:12px 10px; {border} font-size:14px; color:#0b0b0b; {_MONO_NUM} text-align:right;">{rsi_str}</td>
+            <td style="padding:12px 10px; {border} text-align:center;">{_chip(r['rsi_zone'])}</td>
+            <td style="padding:12px 10px; {border} font-size:14px; {_MONO_NUM} text-align:right; white-space:nowrap;">{_short_cell(r)}</td>
+            <td class="ink" style="padding:12px 10px; {border} font-size:14px; color:#0b0b0b; {_MONO_NUM} text-align:right;">{dtc_str}</td>
+            <td class="sub" style="padding:12px 10px; {border} font-size:13px; color:#52514e;">{signal_html}</td>
           </tr>"""
 
 
@@ -88,7 +116,7 @@ def _table(rows: list[dict]) -> str:
         for name, align in [
             ("Ticker", "left"), ("Z-score", "right"), ("Mentions", "right"),
             (f"RSI({config.RSI_PERIOD})", "right"), ("Zone", "center"),
-            ("Signal", "left"),
+            ("Short flt", "right"), ("DTC", "right"), ("Signal", "left"),
         ]
     )
     body = "".join(_row(r, i == len(rows) - 1) for i, r in enumerate(rows))
@@ -102,6 +130,7 @@ def _table(rows: list[dict]) -> str:
 def build_html_report(date: str, rows: list[dict]) -> str:
     top_z = f"{rows[0]['z_score']:.2f}&sigma;" if rows else "&mdash;"
     top_ticker = html.escape(rows[0]["ticker"]) if rows else ""
+    n_squeeze = sum(1 for r in rows if r.get("squeeze"))
 
     return f"""<!doctype html>
 <html lang="en">
@@ -145,7 +174,7 @@ def build_html_report(date: str, rows: list[dict]) -> str:
                 <td width="12" style="font-size:0;">&nbsp;</td>
                 {_kpi("Top spike", top_z, top_ticker)}
                 <td width="12" style="font-size:0;">&nbsp;</td>
-                {_kpi("Baseline", f"{config.BASELINE_DAYS}d", "rolling mean / std")}
+                {_kpi("Squeeze watch", str(n_squeeze), f"short float &ge; {config.SQUEEZE_SHORT_FLOAT_PCT:.0f}%")}
               </tr>
             </table>
           </td>
@@ -165,6 +194,7 @@ def build_html_report(date: str, rows: list[dict]) -> str:
               Sources: Reddit mentions (r/wallstreetbets, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket &mdash; direct API and/or ApeWisdom aggregate) &middot; StockTwits<br>
               RSI: {config.RSI_PERIOD}-period daily via Yahoo Finance &middot; Baseline: {config.BASELINE_DAYS}-day rolling mean/std, today excluded &middot; Min {config.MIN_HISTORY_DAYS} days history<br>
               Zones: &lt;30 OVERSOLD &middot; 30&ndash;40 WEAK &middot; 40&ndash;60 NEUTRAL &middot; 60&ndash;70 STRONG &middot; &gt;70 OVERBOUGHT<br>
+              Short flt: short float % of shares (Finviz; exchange data lags up to ~2 weeks) &middot; DTC: days to cover &middot; &#9650;/&#9660;: daily short-volume ratio rising/falling (FINRA) &middot; &#128293; SQUEEZE WATCH: short float &ge; {config.SQUEEZE_SHORT_FLOAT_PCT:.0f}% (or &ge; {config.SQUEEZE_ALT_SHORT_FLOAT_PCT:.0f}% with DTC &ge; {config.SQUEEZE_ALT_DTC:.0f})<br>
               Automated research signal &mdash; not investment advice.
             </div>
           </td>

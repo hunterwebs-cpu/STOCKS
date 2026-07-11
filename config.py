@@ -50,6 +50,14 @@ MIN_MENTIONS_TODAY = int(_env("MIN_MENTIONS_TODAY", "10"))
 # ── Technicals ────────────────────────────────────────────────────────────────
 RSI_PERIOD = int(_env("RSI_PERIOD", "21"))
 
+# ── Short squeeze detection ───────────────────────────────────────────────────
+# Buzzing tickers at/above this short float %% get the SQUEEZE WATCH tag
+SQUEEZE_SHORT_FLOAT_PCT = float(_env("SQUEEZE_SHORT_FLOAT_PCT", "20"))
+# ...or this short float combined with this many days-to-cover
+SQUEEZE_ALT_SHORT_FLOAT_PCT = float(_env("SQUEEZE_ALT_SHORT_FLOAT_PCT", "15"))
+SQUEEZE_ALT_DTC = float(_env("SQUEEZE_ALT_DTC", "7"))
+FINVIZ_SLEEP = float(_env("FINVIZ_SLEEP", "0.5"))
+
 # ── Storage ───────────────────────────────────────────────────────────────────
 DB_PATH = _env("DB_PATH", str(BASE_DIR / "db" / "mentions.sqlite3"))
 REPORT_DIR = _env("REPORT_DIR", str(BASE_DIR / "reports" / "output"))
