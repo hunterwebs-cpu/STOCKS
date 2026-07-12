@@ -7,11 +7,12 @@ _HEADER = (
     f"{'RSI(21)':<8} {'ZONE':<11} {'SHORT%':<8} {'DTC':<6} SIGNAL"
 )
 _MOVERS_HEADER = (
-    f"{'TICKER':<8} {'MENTIONS':<9} {'BASELINE':<9} {'CHANGE':<9} {'Z-SCORE':<9} FLAGGED?"
+    f"{'TICKER':<8} {'MENTIONS':<9} {'BASELINE':<9} {'CHANGE':<9} {'Z-SCORE':<9} "
+    f"{'RSI(21)':<8} {'SHORT%':<8} FLAGGED?"
 )
 _RULE_WIDE = "=" * 60
 _RULE_TABLE = "-" * 100
-_RULE_MOVERS = "-" * 60
+_RULE_MOVERS = "-" * 100
 
 _KEY_LINES = [
     "KEY — HOW TO READ THIS REPORT",
@@ -21,6 +22,13 @@ _KEY_LINES = [
     "              3+ is rare.",
     "RSI(21)       Price momentum, 0-100. Below 30 = oversold (may be due for",
     "              a bounce). Above 70 = overbought (may be due to pull back).",
+    "52W RANGE     The lowest and highest closing price over the past year.",
+    "              Where today sits in that range adds context: near the low",
+    "              may mean oversold/undervalued; near the high may mean",
+    "              strong momentum or a breakout.",
+    "PREV CLOSE    The most recent completed daily closing price. Since this",
+    "              report runs before market open, it's effectively",
+    "              yesterday's close heading into the next session.",
     "SHORT%        Percent of a company's tradeable shares currently sold",
     "              short (bets the price will fall). Higher = more fuel for",
     "              a squeeze if the price rises and shorts must buy back.",
@@ -36,6 +44,14 @@ _KEY_LINES = [
     "              short-sellers to buy back stock, which pushes the price",
     "              higher still, forcing more covering, and so on.",
 ]
+
+
+def _price_line(r: dict) -> str:
+    lo, hi, pc = r.get("low_52w"), r.get("high_52w"), r.get("prev_close")
+    lo_str = f"${lo:,.2f}" if lo is not None else "n/a"
+    hi_str = f"${hi:,.2f}" if hi is not None else "n/a"
+    pc_str = f"${pc:,.2f}" if pc is not None else "n/a"
+    return f"         52W: {lo_str} - {hi_str}   |   Prev Close: {pc_str}"
 
 
 def _movers_table(movers: list[dict]) -> list[str]:
@@ -54,18 +70,24 @@ def _movers_table(movers: list[dict]) -> list[str]:
     for m in movers:
         pct = m.get("pct_change")
         pct_str = f"{pct:+.0f}%" if pct is not None else "n/a"
+        rsi_str = f"{m['rsi']:.1f}" if m.get("rsi") is not None else "n/a"
+        sf = m.get("short_float")
+        sf_str = f"{sf:.1f}%" if sf is not None else "n/a"
         flagged_str = "yes" if m.get("flagged") else ""
+        if m.get("squeeze"):
+            flagged_str = ("SQUEEZE " + flagged_str).strip()
         lines.append(
             f"{m['ticker']:<8} {m['mentions']:<9} {m['baseline_avg']:<9.1f} "
-            f"{pct_str:<9} {m['z_score']:<9.2f} {flagged_str}"
+            f"{pct_str:<9} {m['z_score']:<9.2f} {rsi_str:<8} {sf_str:<8} {flagged_str}"
         )
+        lines.append(_price_line(m))
     return lines
 
 
 def build_report(date: str, rows: list[dict], movers: list[dict] | None = None) -> str:
     """`rows` items: ticker, z_score, mentions, baseline_avg, rsi, rsi_zone,
-    signal, short_float, days_to_cover, sv_trend, squeeze.
-    `movers` items: ticker, mentions, baseline_avg, z_score, pct_change, flagged.
+    signal, short_float, days_to_cover, sv_trend, squeeze, high_52w, low_52w,
+    prev_close. `movers` items: same plus pct_change, flagged.
     """
     lines = [
         f"NIGHTLY BUZZ REPORT — {date}",
@@ -93,6 +115,7 @@ def build_report(date: str, rows: list[dict], movers: list[dict] | None = None) 
                 f"{r['baseline_avg']:<9.1f} {rsi_str:<8} {r['rsi_zone']:<11} "
                 f"{sf_str:<8} {dtc_str:<6} {signal}"
             )
+            lines.append(_price_line(r))
     else:
         lines.append("(no tickers flagged tonight)")
 
@@ -105,6 +128,8 @@ def build_report(date: str, rows: list[dict], movers: list[dict] | None = None) 
         "StockTwits",
         f"RSI: {config.RSI_PERIOD}-period daily | "
         f"Baseline: {config.BASELINE_DAYS}-day rolling mean/std",
+        "Prices: Yahoo Finance daily bars (52-week hi/lo; previous close = "
+        "latest completed session before this report runs)",
         f"SHORT%: short float (Finviz, lags up to ~2wk) | DTC: days to cover | "
         f"SQUEEZE WATCH: short float >= {config.SQUEEZE_SHORT_FLOAT_PCT:.0f}% "
         f"(or >= {config.SQUEEZE_ALT_SHORT_FLOAT_PCT:.0f}% with DTC >= "

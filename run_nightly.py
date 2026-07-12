@@ -13,6 +13,7 @@ Run via cron ~8pm ET on trading-day eves (see README).
 
 import logging
 import sys
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -99,45 +100,58 @@ def main() -> int:
             store, today, n=config.TOP_MOVERS_COUNT,
             min_mentions=config.TOP_MOVERS_MIN_MENTIONS,
         )
-        sv_history = {
-            h.ticker: store.short_volume_history(h.ticker) for h in hits
-        }
+        all_tickers = sorted({h.ticker for h in hits} | {m.ticker for m in movers})
+        sv_history = {t: store.short_volume_history(t) for t in all_tickers}
 
-    short_stats = short_interest.finviz_stats_bulk([h.ticker for h in hits])
+    # One Finviz + one Yahoo fetch per unique ticker across both the flagged
+    # list and the Top Movers radar — every ticker in the report gets RSI,
+    # short float/DTC, and 52-week range, not just the ones that formally flag.
+    short_stats = short_interest.finviz_stats_bulk(all_tickers)
+    price_stats: dict[str, dict] = {}
+    for t in all_tickers:
+        price_stats[t] = technical.fetch_price_data(t)
+        time.sleep(config.PRICE_FETCH_SLEEP)
 
-    rows = []
-    for hit in hits:
-        rsi_val = technical.rsi(hit.ticker)
-        zone = technical.rsi_zone(rsi_val)
-        stats = short_stats.get(hit.ticker, {})
-        short_float = stats.get("short_float_pct")
-        dtc = stats.get("days_to_cover")
-        squeeze = short_float is not None and (
+    def _is_squeeze(short_float, dtc):
+        return short_float is not None and (
             short_float >= config.SQUEEZE_SHORT_FLOAT_PCT
             or (short_float >= config.SQUEEZE_ALT_SHORT_FLOAT_PCT
                 and (dtc or 0) >= config.SQUEEZE_ALT_DTC)
         )
-        rows.append(
-            {
-                "ticker": hit.ticker,
-                "z_score": hit.z_score,
-                "mentions": hit.mentions,
-                "baseline_avg": hit.baseline_avg,
-                "rsi": rsi_val,
-                "rsi_zone": zone,
-                "signal": technical.signal_for_zone(zone),
-                "short_float": short_float,
-                "days_to_cover": dtc,
-                "sv_trend": short_interest.short_volume_trend(
-                    sv_history.get(hit.ticker, [])
-                ),
-                "squeeze": squeeze,
-            }
+
+    def _annotate(ticker: str, base: dict) -> dict:
+        stats = short_stats.get(ticker, {})
+        price = price_stats.get(ticker, {})
+        short_float = stats.get("short_float_pct")
+        dtc = stats.get("days_to_cover")
+        base.update(
+            rsi=price.get("rsi"),
+            rsi_zone=price.get("rsi_zone", "N/A"),
+            short_float=short_float,
+            days_to_cover=dtc,
+            sv_trend=short_interest.short_volume_trend(sv_history.get(ticker, [])),
+            squeeze=_is_squeeze(short_float, dtc),
+            high_52w=price.get("high_52w"),
+            low_52w=price.get("low_52w"),
+            prev_close=price.get("prev_close"),
         )
+        return base
+
+    rows = []
+    for hit in hits:
+        row = _annotate(hit.ticker, {
+            "ticker": hit.ticker,
+            "z_score": hit.z_score,
+            "mentions": hit.mentions,
+            "baseline_avg": hit.baseline_avg,
+        })
+        row["signal"] = technical.signal_for_zone(row["rsi_zone"])
+        rows.append(row)
 
     flagged_tickers = {h.ticker for h in hits}
-    mover_rows = [
-        {
+    mover_rows = []
+    for m in movers:
+        row = _annotate(m.ticker, {
             "ticker": m.ticker,
             "mentions": m.mentions,
             "baseline_avg": m.baseline_avg,
@@ -147,9 +161,8 @@ def main() -> int:
                 if m.baseline_avg > 0 else None
             ),
             "flagged": m.ticker in flagged_tickers,
-        }
-        for m in movers
-    ]
+        })
+        mover_rows.append(row)
 
     report = formatter.build_report(data_date, rows, mover_rows)
     html_report = html_formatter.build_html_report(data_date, rows, mover_rows)

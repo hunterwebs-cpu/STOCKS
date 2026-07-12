@@ -61,6 +61,8 @@ SQUEEZE_SHORT_FLOAT_PCT = float(_env("SQUEEZE_SHORT_FLOAT_PCT", "20"))
 SQUEEZE_ALT_SHORT_FLOAT_PCT = float(_env("SQUEEZE_ALT_SHORT_FLOAT_PCT", "15"))
 SQUEEZE_ALT_DTC = float(_env("SQUEEZE_ALT_DTC", "7"))
 FINVIZ_SLEEP = float(_env("FINVIZ_SLEEP", "0.5"))
+# Pause between per-ticker Yahoo Finance price fetches (RSI/52wk/prev close)
+PRICE_FETCH_SLEEP = float(_env("PRICE_FETCH_SLEEP", "0.3"))
 
 # ── Storage ───────────────────────────────────────────────────────────────────
 DB_PATH = _env("DB_PATH", str(BASE_DIR / "db" / "mentions.sqlite3"))
