@@ -1,0 +1,95 @@
+NIGHTLY BUZZ REPORT — 2026-08-16
+============================================================
+Stocks with social mention spike >= 1.2σ above 30-day baseline
+Total flagged: 9
+
+TICKER   Z-SCORE   MENTIONS  30D AVG   RSI(21)  ZONE        SHORT%   DTC    SIGNAL
+----------------------------------------------------------------------------------------------------
+TGT      11.17     12        0.8       67.4     STRONG      3.7%     3.5    BUZZ + STRONG — Momentum running
+         52W: $83.44 - $156.47   |   Prev Close: $154.48
+BIDU     7.99      16        0.8       39.8     WEAK        3.0%     3.5    BUZZ + WEAK — Early interest, still soft
+         52W: $84.82 - $165.30   |   Prev Close: $103.67
+CRMD     7.13      21        0.5       46.5     NEUTRAL     22.5%    11.9   SQUEEZE WATCH | BUZZ + NEUTRAL — Building momentum
+         52W: $6.13 - $14.96   |   Prev Close: $7.54
+NLST     3.74      30        2.0       80.4     OVERBOUGHT  n/a      n/a    BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $0.45 - $5.98   |   Prev Close: $5.88
+RMD      3.18      12        1.5       58.8     NEUTRAL     10.9%    10.2   BUZZ + NEUTRAL — Building momentum
+         52W: $180.27 - $293.81   |   Prev Close: $224.46
+MSTR     2.86      50        13.2      42.9     NEUTRAL     8.9%     1.6    BUZZ + NEUTRAL — Building momentum
+         52W: $81.81 - $372.62   |   Prev Close: $93.04
+CAPR     2.37      31        5.8       30.0     WEAK        30.6%    5.1    SQUEEZE WATCH | BUZZ + WEAK — Early interest, still soft
+         52W: $2.96 - $40.37   |   Prev Close: $6.65
+INFQ     2.00      32        5.0       55.3     NEUTRAL     14.9%    1.6    BUZZ + NEUTRAL — Building momentum
+         52W: $8.52 - $21.28   |   Prev Close: $12.86
+BA       1.34      20        6.5       55.1     NEUTRAL     2.0%     2.5    BUZZ + NEUTRAL — Building momentum
+         52W: $176.77 - $254.35   |   Prev Close: $231.67
+
+============================================================
+TOP 15 MOVERS — biggest deviation from each ticker's own baseline today (broader than the flagged list above)
+----------------------------------------------------------------------------------------------------
+TICKER   MENTIONS  BASELINE  CHANGE    Z-SCORE   RSI(21)  SHORT%   FLAGGED?
+----------------------------------------------------------------------------------------------------
+TGT      12        0.8       +1400%    11.17     67.4     3.7%     yes
+         52W: $83.44 - $156.47   |   Prev Close: $154.48
+BIDU     16        0.8       +1900%    7.99      39.8     3.0%     yes
+         52W: $84.82 - $165.30   |   Prev Close: $103.67
+CRMD     21        0.5       +4100%    7.13      46.5     22.5%    SQUEEZE yes
+         52W: $6.13 - $14.96   |   Prev Close: $7.54
+MTG      8         0.8       +900%     7.11      69.4     4.2%     
+         52W: $24.69 - $31.89   |   Prev Close: $31.16
+JOBY     7         0.8       +775%     6.20      47.6     17.1%    
+         52W: $6.63 - $19.98   |   Prev Close: $7.92
+DBMF     6         0.6       +900%     5.40      57.2     n/a      
+         52W: $25.67 - $31.66   |   Prev Close: $31.35
+BOIL     5         0.1       +4900%    4.90      39.2     n/a      
+         52W: $18.41 - $93.70   |   Prev Close: $19.35
+NLST     30        2.0       +1400%    3.74      80.4     n/a      yes
+         52W: $0.45 - $5.98   |   Prev Close: $5.88
+RMD      12        1.5       +700%     3.18      58.8     10.9%    yes
+         52W: $180.27 - $293.81   |   Prev Close: $224.46
+MSTR     50        13.2      +279%     2.86      42.9     8.9%     yes
+         52W: $81.81 - $372.62   |   Prev Close: $93.04
+CPA      6         1.8       +233%     2.60      45.2     4.3%     
+         52W: $107.44 - $160.47   |   Prev Close: $135.87
+CAPR     31        5.8       +434%     2.37      30.0     30.6%    SQUEEZE yes
+         52W: $2.96 - $40.37   |   Prev Close: $6.65
+INFQ     32        5.0       +540%     2.00      55.3     14.9%    yes
+         52W: $8.52 - $21.28   |   Prev Close: $12.86
+DNA      7         1.9       +268%     1.95      38.7     10.9%    
+         52W: $5.37 - $17.58   |   Prev Close: $6.79
+BA       20        6.5       +208%     1.34      55.1     2.0%     yes
+         52W: $176.77 - $254.35   |   Prev Close: $231.67
+
+Sources: Reddit mentions (WSB, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket — direct API and/or ApeWisdom aggregate), StockTwits
+RSI: 21-period daily | Baseline: 30-day rolling mean/std
+Prices: Yahoo Finance daily bars (52-week hi/lo; previous close = latest completed session before this report runs)
+SHORT%: short float (Finviz, lags up to ~2wk) | DTC: days to cover | SQUEEZE WATCH: short float >= 20% (or >= 15% with DTC >= 7)
+
+KEY — HOW TO READ THIS REPORT
+============================================================
+Z-SCORE       How unusual today's mention count is vs. this ticker's own
+              recent history, in standard deviations. 1.2+ is unusual,
+              3+ is rare.
+RSI(21)       Price momentum, 0-100. Below 30 = oversold (may be due for
+              a bounce). Above 70 = overbought (may be due to pull back).
+52W RANGE     The lowest and highest closing price over the past year.
+              Where today sits in that range adds context: near the low
+              may mean oversold/undervalued; near the high may mean
+              strong momentum or a breakout.
+PREV CLOSE    The most recent completed daily closing price. Since this
+              report runs before market open, it's effectively
+              yesterday's close heading into the next session.
+SHORT%        Percent of a company's tradeable shares currently sold
+              short (bets the price will fall). Higher = more fuel for
+              a squeeze if the price rises and shorts must buy back.
+DTC           Days-to-cover: how many days of average volume it would
+              take short-sellers to buy back all their borrowed shares.
+              Higher = harder for shorts to exit quickly.
+SHORT TREND   Whether daily short-selling (FINRA data) is rising (^) or
+              falling (v). Rising = shorts still piling in. Falling =
+              shorts may be covering — itself a source of upward
+              price pressure.
+SQUEEZE WATCH Heavy social buzz + a high short float at the same time —
+              the classic setup for a short squeeze: rising prices force
+              short-sellers to buy back stock, which pushes the price
+              higher still, forcing more covering, and so on.
