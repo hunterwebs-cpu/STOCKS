@@ -1,0 +1,147 @@
+NIGHTLY BUZZ REPORT — 2026-08-19
+============================================================
+Stocks with social mention spike >= 1.2σ above 30-day baseline
+Total flagged: 35
+
+TICKER   Z-SCORE   MENTIONS  30D AVG   RSI(21)  ZONE        SHORT%   DTC    SIGNAL
+----------------------------------------------------------------------------------------------------
+MRNA     159.39    880       1.5       88.2     OVERBOUGHT  13.6%    7.3    BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $22.28 - $176.66   |   Prev Close: $174.38
+RNA      142.97    143       0.0       62.8     STRONG      20.6%    18.3   SQUEEZE WATCH | BUZZ + STRONG — Momentum running
+         52W: $11.13 - $16.77   |   Prev Close: $13.71
+GDXU     29.73     30        0.3       62.7     STRONG      n/a      n/a    BUZZ + STRONG — Momentum running
+         52W: $64.45 - $540.78   |   Prev Close: $158.63
+BULL     26.19     134       4.1       64.0     STRONG      8.6%     2.3    BUZZ + STRONG — Momentum running
+         52W: $4.50 - $16.04   |   Prev Close: $8.64
+AGQ      24.83     25        0.2       54.4     NEUTRAL     n/a      n/a    BUZZ + NEUTRAL — Building momentum
+         52W: $50.85 - $431.47   |   Prev Close: $83.13
+BROS     10.59     24        1.5       36.3     WEAK        15.3%    3.8    BUZZ + WEAK — Early interest, still soft
+         52W: $44.58 - $74.65   |   Prev Close: $50.27
+MRVI     10.00     10        0.0       65.7     STRONG      7.7%     3.0    BUZZ + STRONG — Momentum running
+         52W: $2.28 - $7.70   |   Prev Close: $7.22
+MSS      9.90      11        1.1       40.9     NEUTRAL     26.2%    0.1    SQUEEZE WATCH | BUZZ + NEUTRAL — Building momentum
+         52W: $1.24 - $198.00   |   Prev Close: $1.86
+XLV      9.38      20        1.1       70.8     OVERBOUGHT  n/a      n/a    BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $133.73 - $176.60   |   Prev Close: $175.68
+MRVL     9.33      83        9.9       54.6     NEUTRAL     4.1%     0.9    BUZZ + NEUTRAL — Building momentum
+         52W: $61.44 - $329.88   |   Prev Close: $237.27
+MRK      8.15      30        1.0       76.8     OVERBOUGHT  1.1%     2.8    BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $77.58 - $153.50   |   Prev Close: $152.20
+CAST     7.75      30        0.9       46.0     NEUTRAL     5.6%     0.1    BUZZ + NEUTRAL — Building momentum
+         52W: $0.50 - $33.00   |   Prev Close: $1.70
+TJX      6.37      11        0.8       35.2     WEAK        1.8%     3.3    BUZZ + WEAK — Early interest, still soft
+         52W: $134.75 - $170.00   |   Prev Close: $144.50
+SLS      5.34      66        10.6      61.1     STRONG      27.6%    6.1    SQUEEZE WATCH | BUZZ + STRONG — Momentum running
+         52W: $1.39 - $15.88   |   Prev Close: $13.85
+TGT      5.12      49        2.9       68.4     STRONG      3.7%     3.5    BUZZ + STRONG — Momentum running
+         52W: $83.44 - $161.98   |   Prev Close: $159.00
+BMNR     4.76      33        3.0       60.4     STRONG      7.2%     1.2    BUZZ + STRONG — Momentum running
+         52W: $12.80 - $65.60   |   Prev Close: $20.24
+AUPH     4.74      30        1.6       54.6     NEUTRAL     8.2%     6.6    BUZZ + NEUTRAL — Building momentum
+         52W: $10.34 - $19.25   |   Prev Close: $16.17
+PFE      3.87      32        2.9       69.4     STRONG      2.8%     3.9    BUZZ + STRONG — Momentum running
+         52W: $23.58 - $28.75   |   Prev Close: $28.24
+XLE      3.84      28        3.4       67.2     STRONG      n/a      n/a    BUZZ + STRONG — Momentum running
+         52W: $42.35 - $64.25   |   Prev Close: $63.58
+IOVA     3.83      32        2.1       74.4     OVERBOUGHT  25.4%    6.3    SQUEEZE WATCH | BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $1.76 - $8.06   |   Prev Close: $7.99
+AUR      3.73      31        3.0       46.3     NEUTRAL     13.9%    7.0    BUZZ + NEUTRAL — Building momentum
+         52W: $3.60 - $8.56   |   Prev Close: $6.20
+GLP      3.66      12        2.6       57.2     NEUTRAL     0.5%     1.4    BUZZ + NEUTRAL — Building momentum
+         52W: $39.58 - $53.25   |   Prev Close: $50.64
+WMT      3.14      15        3.2       49.9     NEUTRAL     1.6%     3.0    BUZZ + NEUTRAL — Building momentum
+         52W: $95.42 - $135.16   |   Prev Close: $114.30
+CADL     2.82      30        3.6       74.9     OVERBOUGHT  20.9%    7.7    SQUEEZE WATCH | BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $4.35 - $13.82   |   Prev Close: $13.50
+SCHD     2.76      20        5.5       70.6     OVERBOUGHT  n/a      n/a    BUZZ + OVERBOUGHT — Extended, chase risk
+         52W: $26.32 - $35.31   |   Prev Close: $35.09
+GLD      2.33      40        11.0      61.8     STRONG      n/a      n/a    BUZZ + STRONG — Momentum running
+         52W: $306.43 - $509.70   |   Prev Close: $413.84
+AVGO     2.31      83        17.3      40.9     NEUTRAL     1.3%     2.4    BUZZ + NEUTRAL — Building momentum
+         52W: $281.87 - $495.00   |   Prev Close: $362.48
+MSTR     2.20      51        17.3      51.1     NEUTRAL     8.9%     1.6    BUZZ + NEUTRAL — Building momentum
+         52W: $81.81 - $365.21   |   Prev Close: $104.25
+TLT      2.18      37        9.4       47.2     NEUTRAL     n/a      n/a    BUZZ + NEUTRAL — Building momentum
+         52W: $81.17 - $92.19   |   Prev Close: $83.02
+DJT      2.17      32        9.1       44.8     NEUTRAL     11.1%    3.7    BUZZ + NEUTRAL — Building momentum
+         52W: $6.96 - $18.97   |   Prev Close: $8.35
+COIN     2.04      31        6.3       51.0     NEUTRAL     10.1%    2.8    BUZZ + NEUTRAL — Building momentum
+         52W: $139.11 - $402.16   |   Prev Close: $160.20
+OS       1.70      10        4.1       N/A      N/A         n/a      n/a    BUZZ — RSI unavailable
+         52W: n/a - n/a   |   Prev Close: n/a
+ET       1.65      14        7.1       61.4     STRONG      0.9%     2.9    BUZZ + STRONG — Momentum running
+         52W: $16.18 - $21.64   |   Prev Close: $21.18
+NFLX     1.51      38        15.8      58.3     NEUTRAL     2.2%     2.2    BUZZ + NEUTRAL — Building momentum
+         52W: $65.08 - $126.71   |   Prev Close: $80.22
+IBKR     1.34      12        6.9       50.3     NEUTRAL     2.1%     1.9    BUZZ + NEUTRAL — Building momentum
+         52W: $58.95 - $97.84   |   Prev Close: $90.54
+
+============================================================
+TOP 15 MOVERS — biggest deviation from each ticker's own baseline today (broader than the flagged list above)
+----------------------------------------------------------------------------------------------------
+TICKER   MENTIONS  BASELINE  CHANGE    Z-SCORE   RSI(21)  SHORT%   FLAGGED?
+----------------------------------------------------------------------------------------------------
+MRNA     880       1.5       +58567%   159.39    88.2     13.6%    yes
+         52W: $22.28 - $176.66   |   Prev Close: $174.38
+RNA      143       0.0       n/a       142.97    62.8     20.6%    SQUEEZE yes
+         52W: $11.13 - $16.77   |   Prev Close: $13.71
+GDXU     30        0.3       +9900%    29.73     62.7     n/a      yes
+         52W: $64.45 - $540.78   |   Prev Close: $158.63
+BULL     134       4.1       +3168%    26.19     64.0     8.6%     yes
+         52W: $4.50 - $16.04   |   Prev Close: $8.64
+AGQ      25        0.2       +12400%   24.83     54.4     n/a      yes
+         52W: $50.85 - $431.47   |   Prev Close: $83.13
+BROS     24        1.5       +1500%    10.59     36.3     15.3%    yes
+         52W: $44.58 - $74.65   |   Prev Close: $50.27
+MRVI     10        0.0       n/a       10.00     65.7     7.7%     yes
+         52W: $2.28 - $7.70   |   Prev Close: $7.22
+MSS      11        1.1       +900%     9.90      40.9     26.2%    SQUEEZE yes
+         52W: $1.24 - $198.00   |   Prev Close: $1.86
+XLV      20        1.1       +1718%    9.38      70.8     n/a      yes
+         52W: $133.73 - $176.60   |   Prev Close: $175.68
+MRVL     83        9.9       +738%     9.33      54.6     4.1%     yes
+         52W: $61.44 - $329.88   |   Prev Close: $237.27
+ALM      9         0.2       +4400%    8.17      54.4     12.9%    
+         52W: $3.97 - $24.41   |   Prev Close: $16.18
+MRK      30        1.0       +2900%    8.15      76.8     1.1%     yes
+         52W: $77.58 - $153.50   |   Prev Close: $152.20
+BNTX     8         0.0       n/a       8.00      74.6     1.0%     
+         52W: $79.52 - $124.00   |   Prev Close: $113.12
+WEAT     8         0.2       +3900%    7.80      59.4     n/a      
+         52W: $19.78 - $26.08   |   Prev Close: $25.34
+CAST     30        0.9       +3233%    7.75      46.0     5.6%     yes
+         52W: $0.50 - $33.00   |   Prev Close: $1.70
+
+Sources: Reddit mentions (WSB, r/stocks, r/investing, r/options, r/pennystocks, r/stockmarket — direct API and/or ApeWisdom aggregate), StockTwits
+RSI: 21-period daily | Baseline: 30-day rolling mean/std
+Prices: Yahoo Finance daily bars (52-week hi/lo; previous close = latest completed session before this report runs)
+SHORT%: short float (Finviz, lags up to ~2wk) | DTC: days to cover | SQUEEZE WATCH: short float >= 20% (or >= 15% with DTC >= 7)
+
+KEY — HOW TO READ THIS REPORT
+============================================================
+Z-SCORE       How unusual today's mention count is vs. this ticker's own
+              recent history, in standard deviations. 1.2+ is unusual,
+              3+ is rare.
+RSI(21)       Price momentum, 0-100. Below 30 = oversold (may be due for
+              a bounce). Above 70 = overbought (may be due to pull back).
+52W RANGE     The lowest and highest closing price over the past year.
+              Where today sits in that range adds context: near the low
+              may mean oversold/undervalued; near the high may mean
+              strong momentum or a breakout.
+PREV CLOSE    The most recent completed daily closing price. Since this
+              report runs before market open, it's effectively
+              yesterday's close heading into the next session.
+SHORT%        Percent of a company's tradeable shares currently sold
+              short (bets the price will fall). Higher = more fuel for
+              a squeeze if the price rises and shorts must buy back.
+DTC           Days-to-cover: how many days of average volume it would
+              take short-sellers to buy back all their borrowed shares.
+              Higher = harder for shorts to exit quickly.
+SHORT TREND   Whether daily short-selling (FINRA data) is rising (^) or
+              falling (v). Rising = shorts still piling in. Falling =
+              shorts may be covering — itself a source of upward
+              price pressure.
+SQUEEZE WATCH Heavy social buzz + a high short float at the same time —
+              the classic setup for a short squeeze: rising prices force
+              short-sellers to buy back stock, which pushes the price
+              higher still, forcing more covering, and so on.
