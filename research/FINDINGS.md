@@ -290,3 +290,20 @@ per contract. **Options lose on this hold length even if the edge is real.**
 Fractional shares (commission-free) keep the whole move. For options to work
 in a small account the expected move must be large relative to the spread,
 which points to swing holds on the daily chart, not 1–2 hour holds.
+
+## Daily swing with options on affordable names (`research/daily_options_small.py`)
+9 names (SOFI, F, AAL, SNAP, RIVN, NIO, T, PFE, GRAB), 2015–2026, ~0.70-delta
+30-DTE options priced from realized vol ×1.15, 5% spread cost.
+
+* Of ~50 variants, only one (PFE calls, two-bar exit, 68 trades) was
+  positive in both halves with PF > 1.2. That's about what chance gives.
+* Calls + two-bar fade exit was positive on 6 of 9 names. Pooled: **362
+  trades, avg +6.0%, median −20.6%, PF 1.25**. Without the top 5 trades the
+  average is −1.7%. Gains are concentrated in 2020–21 (+57%, +16%); most
+  other years are flat or negative. It's a "catch the rare runner" profile
+  that depends on the market regime.
+* **$500 account simulation** (one position at a time, premium ≤ 10% / 20%
+  of equity): **$500 → $287 (−46% max DD) / → $125 (−75%)** over 12 years.
+  A small account can only afford contracts on the cheapest names, and those
+  were the losers. Affordability selects the worst trades.
+* Puts were negative on almost every name.
