@@ -253,3 +253,40 @@ Takeaways:
 * Whatever made it work when traded by hand (discretion, the 2020–21 bull
   market, or luck) is not captured by these rules. The user's own Webull
   order history from that period is the best evidence for which.
+
+---
+
+# Findings #5: small accounts ($500): which symbols, which vehicle
+
+**Settlement:** US standard is still **T+1** (since May 28, 2024). An SEC
+*petition* (July 2026, Release 4-912) asks for same-day settlement; nothing
+adopted. In a cash account you can buy with unsettled funds, but selling that
+position before the funds settle is a good-faith violation, so each day's
+round trips are limited to settled cash. The paper broker models this.
+
+**Screen** (`research/small_account_screen.py`, ATM options 5–16 DTE): only
+**SOFI** (~$14, ATM ~$34–58, spread 3.5–6%, 84k contracts/day) and **F**
+(~$12, ATM ~$21–28, spread 7–10%) pass every filter: ATM ≤ $100, spread
+≤ 10%, OI ≥ 500, $200M+/day traded. Near misses: AAL (thin call OI), TQQQ /
+SQQQ / SMCI (~$130–180 per ATM contract). Quotes were taken after hours, so
+re-check spreads intraday.
+
+**User's setup on 60-min bars, ~2 years** (underlying only, R = move ÷ ATR):
+
+| Symbol | Long, exit first red | Halves (avg R) |
+|---|---|---|
+| SOFI | N 126, win 44%, +0.16R, PF 1.50 | +0.30 / +0.04 |
+| F | N 119, win 42%, +0.15R, PF 1.53 | −0.01 / +0.31 |
+| QQQ | N 174, win 34%, −0.11R, PF 0.77 | — |
+| AAL, TQQQ, SMCI, SQQQ | roughly breakeven or negative | — |
+
+Better than QQQ, but each is good in only one half, and with 28 variants
+tested a few were bound to look good. Treat it as a lead, not an edge.
+
+**Vehicle math:** the average trade moves SOFI **$0.027/share** and F
+**$0.019/share** over ~2 hours. An ATM option (delta ~0.5) captures about
+half of that, $1–1.30 per contract, while the bid/ask spread costs about $2
+per contract. **Options lose on this hold length even if the edge is real.**
+Fractional shares (commission-free) keep the whole move. For options to work
+in a small account the expected move must be large relative to the spread,
+which points to swing holds on the daily chart, not 1–2 hour holds.

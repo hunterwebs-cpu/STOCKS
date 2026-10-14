@@ -96,8 +96,9 @@ def main():
     ap.add_argument("--days", type=int, default=59)
     ap.add_argument("--data", default="yahoo", choices=["yahoo", "webull"])
     ap.add_argument("--equity", type=float, default=500.0)
+    ap.add_argument("--symbol", default="QQQ")
     a = ap.parse_args()
-    cfg = Config(start_equity=a.equity)
+    cfg = Config(symbol=a.symbol.upper(), start_equity=a.equity)
     out = a.out or f"runs/{a.mode if a.mode != 'report' else 'live'}"
     if a.mode == "replay":
         print(json.dumps(replay(cfg, out, a.days, a.data), indent=2))
