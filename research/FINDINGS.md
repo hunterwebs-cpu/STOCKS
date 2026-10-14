@@ -307,3 +307,48 @@ which points to swing holds on the daily chart, not 1–2 hour holds.
   A small account can only afford contracts on the cheapest names, and those
   were the losers. Affordability selects the worst trades.
 * Puts were negative on almost every name.
+
+---
+
+# Findings #6: 0DTE tests (`research/zero_dte_study.py`): one-strike scalp and power hour
+
+Data: Yahoo 5-min, 2026-07-22 → 2026-10-14 (~58 trading days). Options priced
+with Black-Scholes; IV = prior-day VIX1D (× VXN/VIX for QQQ), then **calibrated
+to real SPY/QQQ next-day quotes on 2026-10-14**. Before calibration the model
+underpriced QQQ options by 20–40% and puts by 20–170% (skew), which made
+buying look better than it is. Fitted multipliers: SPY calls 0.94, SPY puts
+1.19, QQQ calls 1.23, QQQ puts 1.65. Costs: $0.02/share spread + $0.10 fees.
+Still a model; real option bars (Webull API) are needed to confirm.
+
+**A) One-strike scalp** (2 OTM, sell on a $1 favorable move, stop on a $1
+adverse move, 60-min time stop):
+
+| | Before lunch (09:45–11:30) | 3:00–3:30 pm |
+|---|---|---|
+| QQQ, user's setup | 144 trades, 53% win, **+2.9%** avg, median +20%, +$287 per 1 lot | 26 trades, −59% avg |
+| QQQ, calls / puts at random | −0.4% / −2.4% | −58% / −55% |
+| SPY, user's setup | 95 trades, +8.6% | −114% |
+| SPY, random calls | +8.8% (no lift from setup) | −101% |
+
+* Afternoon 2-OTM 0DTE: the contracts cost $3–27, a $1 move in the last
+  hour is rare, and the spread is a large share of the price. Strongly
+  negative.
+* Before lunch, QQQ with the setup filter is the only case beating its own
+  random baseline (+2.9% vs about −1%). That's a lead: 58 days, one regime.
+* $500, 20% of equity per day: QQQ morning + setup **$500 → $865** (max DD
+  −25%). QQQ afternoon one-strike **$500 → $53**.
+
+**B) Power hour** (buy 15:00/15:15/15:30, sell 15:55):
+* Calls lost at every strike/time (−3% to −48% avg).
+* Puts made money (+19% to +83%) because the last hour fell on 58% of SPY
+  days in this sample. Over ~2 years of 60-min bars the 3:30→4:00 move is a
+  coin flip (SPY down 49% of days, QQQ 47%, average ≈ 0), and the direction
+  flips by quarter (QQQ down 56% of days in 2025Q4, 37% in 2026Q2). No
+  durable direction edge; a buddy's big gains fit a regime run (and
+  survivorship: we hear from the winners).
+* Trend (VWAP) direction, the obvious filter: mostly negative.
+  $500 at 20%/day: **$500 → $4–23**.
+
+**Sizing note:** 20% of equity per day only compounds upward if the median
+trade is positive. Here most medians are −20% to −100%, and every
+negative-median variant was wiped out in the sim.
