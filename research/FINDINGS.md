@@ -352,3 +352,35 @@ adverse move, 60-min time stop):
 **Sizing note:** 20% of equity per day only compounds upward if the median
 trade is positive. Here most medians are −20% to −100%, and every
 negative-median variant was wiped out in the sim.
+
+---
+
+# Findings #7: hit & quit and one-strike 0DTE on 3.5 years of Webull 5-min data
+
+Data: Webull 5-min RTH bars, SPY & QQQ, 2023-04-25 → 2026-10-14 (VIX1D starts
+April 2023), ~870 trading days. Pricing as in #6 (calibrated BS).
+`research/hit_and_quit.py`.
+
+* **The 60-day QQQ before-lunch + setup lead did not hold:** −$1.2 to $0.0
+  per day per contract over 3.5 years. +$6/day in 2023, negative in 2025 and
+  2026. The 58-day window was a good stretch inside a losing year.
+* **3:00–3:30 pm one-strike (2 OTM): negative in every variant**, −$1.5 to
+  −$9.4 per day per contract; $500 → $3–6.
+* **Hit & quit raises green days, not money.** E.g. QQQ calls before lunch:
+  53% → 64% green days, $2.6 → $2.4/day. SPY calls: 55% → 62% green,
+  $6.4 → $4.1/day. It changes how the P&L feels, not the edge.
+* **Only positive family: buying calls before lunch** (SPY +$3–6/day per
+  contract, QQQ +$2–3/day), every year 2023–2026. SPY rose 87% over the
+  period, so the upward drift explains much of it; puts lost.
+* SPY calls, one try per day (872 trades): win 47%, avg **+12.9%** per
+  trade, median −19.8%, avg cost $33. **Fragile:**
+  - If real entries cost 10% more than the model: avg +2.9%, $500 → $24.
+    The edge is the same size as the pricing uncertainty.
+  - Sizing at 20%/day: $500 → $97,659 *after falling to $45* (−95%);
+    25%/day → $8; 10%/day lowest balance $239 (−75%). Compounding to large
+    sums also assumes unlimited fills at 0DTE prices.
+  - Start 2025-01-01 at 20%/day: $500 → $3,172 after a −80% drawdown.
+* Verdict: no strategy here is proven. The one candidate (SPY 0DTE calls
+  before lunch, one try, $1 target/stop) needs **real option prices**
+  (historical option bars via the Webull API, or a paid source like
+  ThetaData/Polygon) or a live forward paper test logging real quotes.
