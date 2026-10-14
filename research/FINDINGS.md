@@ -145,3 +145,50 @@ Directions worth testing next:
 3. The other side of the trade: defined-risk credit spreads. The vol premium
    that hurts buyers here pays sellers, and that structure naturally has
    high win rates.
+
+---
+
+# Findings #3: setup lab, i.e. which setups are actually high-probability
+
+`python3 research/setup_lab.py`. For each setup: how often does the
+underlying reach +1 ATR before −2 ATR within 5 days (roughly the
++30%/−60% option bracket)? Compared against the base rate for the same
+direction on every bar. **Lift over base is the edge.** The raw hit rate is
+mostly set by where the target and stop sit.
+
+| Setup (2000–2026) | SPY hit / base / lift | QQQ hit / base / lift |
+|---|---|---|
+| RSI(2) < 10, above 200 SMA (long) | 70% / 52% / **+17.7pt** | 62% / 54% / +8.4pt |
+| 3 down days, above 200 SMA (long) | 70% / 52% / **+17.5pt** | 62% / 54% / +8.6pt |
+| 21 EMA pullback, stacked 8/21/34 (long) | 56% / 52% / +3.4pt | 58% / 54% / +4.0pt |
+| TTM squeeze fire, momentum up (long) | 42% / 52% / **−10.8pt** | 43% / 54% / −11.1pt |
+| Squeeze fire up + stacked EMAs | 40% / 52% / −12.7pt | 49% / 54% / −4.4pt |
+| Short-side setups (below 200 SMA) | mostly ≤ base | mostly ≤ base |
+
+* Buying short-term dips in an uptrend is a real, stable edge on SPY. It
+  holds in both halves of the sample (67%→72%, 68%→71%).
+* The daily TTM squeeze fire, coded mechanically, is **worse than random**
+  for longs. It may still work with Carter's discretion or on intraday
+  timeframes, but that has to be shown, not assumed.
+* Shorts fight the index's upward drift. Puts need a much stronger reason.
+
+**Opening gap fills (same session)**: small gaps (0.1–0.25%) fill 77–84% of
+the time; gaps > 1% fill only 29–40%. Caveat: small gaps fill often *because
+the target is tiny*. This is the same trap as the bracket, and it needs a
+stop and payoff test before it counts as an edge.
+
+### Does the dip edge survive being traded with options?
+
+Long ATM 30-DTE calls on the two dip signals, same pricing model as #2:
+
+| Bracket | SPY RSI2 | SPY 3-down | QQQ RSI2 | QQQ 3-down |
+|---|---|---|---|---|
+| +30/−60 | 65% win, +0.8%/trade | 64%, −0.6% | 62%, −2.5% | 68%, +1.9% |
+| +30/−30 | 51%, −1.4% | 51%, −1.0% | 51%, −0.7% | 52%, +0.2% |
+| +50/−50 | 50%, −3.6% | 48%, −4.6% | 51%, +0.5% | 51%, +1.1% |
+
+The underlying edge is real, but **buying calls roughly breaks even**.
+Dips are exactly when implied vol is elevated, so the calls are expensive
+and theta plus vol crush eat the edge. That points at the vehicle, not the
+setup: express dip-buys by **selling** premium (cash-secured puts or put
+credit spreads, where elevated IV is paid to you) or with shares.
