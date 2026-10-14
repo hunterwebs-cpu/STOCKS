@@ -51,19 +51,35 @@ def mins_to_close(ts):
     return (ts.normalize() + pd.Timedelta(hours=16) - ts).total_seconds() / 60
 
 
+DATA = Path(__file__).resolve().parent.parent / "data"
+
+
+def _bars(sym, px):
+    f = DATA / f"{sym}_5m.csv"
+    if f.exists():
+        df = pd.read_csv(f)
+        df.index = pd.to_datetime(df.pop("Datetime"), utc=True).tz_convert(NY)
+        return df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+    df = pd.DataFrame({k: px[k][sym] for k in ("Open", "High", "Low", "Close", "Volume")}).dropna()
+    df.index = df.index.tz_convert(NY)
+    return df
+
+
 def load():
-    px = yf.download(["SPY", "QQQ"], period="60d", interval="5m", progress=False)
-    vol = yf.download(["^VIX1D", "^VIX", "^VXN"], period="90d", progress=False)["Close"].ffill()
+    use_csv = all((DATA / f"{s}_5m.csv").exists() for s in ("SPY", "QQQ"))
+    px = None if use_csv else yf.download(["SPY", "QQQ"], period="60d", interval="5m", progress=False)
+    vol = yf.download(["^VIX1D", "^VIX", "^VXN"], start="2023-04-01", progress=False)["Close"].ffill()
     vol.index = vol.index.tz_localize(None)
     iv = {"SPY": vol["^VIX1D"] / 100, "QQQ": vol["^VIX1D"] * vol["^VXN"] / vol["^VIX"] / 100}
     out = {}
     for s in ("SPY", "QQQ"):
-        df = pd.DataFrame({k: px[k][s] for k in ("Open", "High", "Low", "Close", "Volume")}).dropna()
-        df.index = df.index.tz_convert(NY)
-        df = df.between_time("09:30", "15:55")
+        df = _bars(s, px).between_time("09:30", "15:55")
         # prior day's vol index close = today's IV
-        day = pd.Series(df.index.tz_localize(None).normalize(), index=df.index)
-        df["iv"] = day.map(lambda d: iv[s][iv[s].index < d].iloc[-1] if (iv[s].index < d).any() else np.nan).values
+        prior = iv[s].shift(1)          # prior day's close is today's IV
+        days = pd.DatetimeIndex(df.index.tz_localize(None).normalize())
+        u = days.unique()
+        per_day = prior.reindex(prior.index.union(u)).ffill().reindex(u)
+        df["iv"] = per_day.reindex(days).values
         # VWAP
         tp = (df.High + df.Low + df.Close) / 3
         g = df.index.date
@@ -122,11 +138,16 @@ def entry_price(row, t, d, otm, sym=None):
     return K, p, iv
 
 
-def one_strike(df, times, how, otm=2, move=1.0, stop_move=1.0, max_hold=60, sym=None):
+def one_strike(df, times, how, otm=2, move=1.0, stop_move=1.0, max_hold=60, sym=None,
+               max_per_day=None, quit_on_win=False):
+    """max_per_day / quit_on_win implement "hit and quit": stop for the day
+    after the first winner, and/or after N attempts."""
     trades = []
     for day, g in df.groupby(df.index.date):
-        busy_until = None
+        busy_until, n_today, won = None, 0, False
         for t, row in g.iterrows():
+            if (quit_on_win and won) or (max_per_day and n_today >= max_per_day):
+                break
             if t.strftime("%H:%M") not in times or (busy_until is not None and t <= busy_until):
                 continue
             d = direction(row, how)
@@ -156,7 +177,7 @@ def one_strike(df, times, how, otm=2, move=1.0, stop_move=1.0, max_hold=60, sym=
             pnl = (exit_val - p0 - SPREAD) * 100 - FEES
             trades.append({"day": day, "t": t, "side": d, "cost": (p0 + SPREAD / 2) * 100,
                            "pnl": pnl, "ret": pnl / ((p0 + SPREAD / 2) * 100), "why": why})
-            busy_until = t_out
+            busy_until, n_today, won = t_out, n_today + 1, pnl > 0
     return pd.DataFrame(trades)
 
 
