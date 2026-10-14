@@ -58,7 +58,7 @@ def _bars(sym, px):
     f = DATA / f"{sym}_5m.csv"
     if f.exists():
         df = pd.read_csv(f)
-        df.index = pd.to_datetime(df.pop("Datetime"), utc=True).tz_convert(NY)
+        df.index = pd.DatetimeIndex(pd.to_datetime(df.pop("Datetime"), utc=True)).tz_convert(NY)
         return df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
     df = pd.DataFrame({k: px[k][sym] for k in ("Open", "High", "Low", "Close", "Volume")}).dropna()
     df.index = df.index.tz_convert(NY)
