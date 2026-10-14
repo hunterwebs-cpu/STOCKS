@@ -37,6 +37,16 @@ def daily_states(symbols, start):
             df = px.xs(s, axis=1, level=1).dropna()
         except KeyError:
             continue
+        if len(df) < 100:
+            continue
+        # Yahoo back-adjusts for splits; undo it so expiry intrinsic uses the
+        # prices the contracts actually traded against.
+        splits = yf.Ticker(s).splits
+        raw = df.Close.copy()
+        if len(splits):
+            splits.index = splits.index.tz_localize(None)
+            for when, ratio in splits.items():
+                raw[raw.index < when] *= ratio
         sq = squeeze(df)
         c = df.Close
         e = {n: c.ewm(span=n, adjust=False).mean() for n in (8, 21, 34, 55, 89)}
@@ -45,7 +55,7 @@ def daily_states(symbols, start):
         st = pd.DataFrame({"close": c, "bull": bull, "bear": bear,
                            "mom_up": sq.mom > 0, "sq_on": sq.on})
         # setup state known at the *prior* close (no lookahead for intraday entries)
-        out[s] = st.shift(1).assign(close=c)
+        out[s] = st.shift(1).assign(close=raw)
     return out
 
 
@@ -70,13 +80,16 @@ def round_trips(d, states):
     for key, lots in books.items():   # held to expiry
         sym, typ, k, exp = key
         st = states.get(sym)
-        if st is None or exp > pd.Timestamp.now():
+        if exp > pd.Timestamp.now():
             continue
-        close = st.close.asof(exp)
-        intrinsic = max(0.0, (close - k) if typ == "CALL" else (k - close))
+        if st is None:   # no price history (e.g. delisted): assume expired worthless
+            intrinsic, how = 0.0, "expired (no data)"
+        else:
+            close = st.close.asof(exp)
+            intrinsic, how = max(0.0, (close - k) if typ == "CALL" else (k - close)), "expired"
         for r, n, px in lots:
             if n > 0:
-                trips.append((r, n, px, intrinsic, exp.tz_localize("America/New_York") + pd.Timedelta(hours=16), "expired"))
+                trips.append((r, n, px, intrinsic, exp.tz_localize("America/New_York") + pd.Timedelta(hours=16), how))
     rows = []
     for r, n, buy, sell, t_out, how in trips:
         st = states.get(r.symbol)
