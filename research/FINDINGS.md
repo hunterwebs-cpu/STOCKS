@@ -94,3 +94,54 @@ structure well.
    is a first pass only.
 5. **Agent loop in UAT:** wire the surviving rule set to the Webull sandbox
    with the risk gate and journaling.
+
+---
+
+# Findings #2: options bracket (+30% target / −60% stop per contract)
+
+Clarified goal: buy ATM calls or puts on SPY/QQQ. Sell at +30% of premium,
+stop at −60%. Run with `python3 research/options_bracket_study.py`.
+
+**The math:** break-even win rate = 60 / (30 + 60) = **66.7%** before costs,
+about 68–70% after the spread. The target sits half as far away as the stop,
+so a coin-flip entry already hits the target first about 2/3 of the time.
+Time decay (theta) and the premium baked into implied vol then make the
+no-edge version lose. A high win rate on this structure proves nothing on its
+own.
+
+**Results** (2005–2026, 30 DTE ATM, priced with Black-Scholes using VIX/VXN,
+10-day time stop, 1.5% round-trip cost, 5% of account in premium per trade):
+
+| Entry | Trades | Win% | Avg/trade | Account | Max DD |
+|---|---|---|---|---|---|
+| SPY coin-flip call/put | 868 | 55.8% | −7.4% | 0.03x | −97% |
+| SPY calls only, random | 816 | 59.4% | −2.8% | 0.26x | −77% |
+| SPY trend pullback (8/21/34 stacked + 21 EMA touch) | 250 | 56.8% | −5.7% | 0.46x | −60% |
+| QQQ coin-flip call/put | 977 | 59.0% | −5.8% | 0.05x | −97% |
+| QQQ calls only, random | 905 | 62.8% | −0.8% | 0.56x | −60% |
+| QQQ trend pullback | 247 | 63.6% | −1.6% | 0.78x | −38% |
+
+Sweep of target/stop pairs on the pullback signal (+30/−30, +50/−50,
++60/−30, +100/−50): all negative. Exits shape the payoff; they cannot
+create an edge.
+
+Takeaways:
+* No variant reached the ~68% win rate needed. Best was 63.6%.
+* Puts lose more than calls. Implied vol usually prices in more movement than
+  actually happens, and indexes drift up; long puts pay for both.
+* Stops get skipped: 13–88 trades per row gapped through −60% and lost more.
+* The trend filters did not clearly beat buying calls at random on QQQ. Any
+  "edge" so far is just the market's upward drift.
+
+Limits: modeled prices, not real chain data (no skew, no real fills).
+Daily bars only, so 0DTE/intraday day trading is untested. Verdict needs
+real historical option data (ThetaData, ORATS, Polygon) before it's final,
+but a model this generous to the buyer still losing is a strong signal.
+
+Directions worth testing next:
+1. Entries with genuine edge, measured on the underlying first: does the
+   signal move price ≥ X% in N days more than 68% of the time?
+2. Intraday SPY/QQQ setups with real intraday + option data.
+3. The other side of the trade: defined-risk credit spreads. The vol premium
+   that hurts buyers here pays sellers, and that structure naturally has
+   high win rates.
