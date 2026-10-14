@@ -192,3 +192,64 @@ Dips are exactly when implied vol is elevated, so the calls are expensive
 and theta plus vol crush eat the edge. That points at the vehicle, not the
 setup: express dip-buys by **selling** premium (cash-secured puts or put
 credit spreads, where elevated IV is paid to you) or with shares.
+
+---
+
+# Findings #4: Simpler's documented rules, and the user's own QQQ setup
+
+## Constraints (confirmed via Webull, read-only)
+* One **individual cash account**. The AI connection has *Trading* authorization.
+* Options level 1–2, no margin: **no spreads**. Cash-secured puts on QQQ/SPY
+  need ~$73k–77k cash per contract, so selling premium is effectively out.
+  The vehicle is long calls/puts (loss capped at premium) or shares.
+* Cash account: no PDT rule, but trades must use **settled** funds (options
+  settle T+1); reusing unsettled proceeds risks good-faith violations.
+
+## What Simpler / Carter actually document (research agent, public sources)
+* Indicator: BB(20, 2) inside KC(20 SMA ± 1.5×ATR20) = squeeze on; momentum =
+  linreg(close − avg(Donchian mid, SMA20), 20). thinkorswim's exact formula is
+  unpublished. Histogram colors: light blue = >0 rising, dark blue = >0
+  falling, red = <0 falling, yellow = <0 rising.
+* Entry: first non-squeeze bar after ≥3–5 squeeze bars (sources differ), in
+  the histogram's direction. Carter also scales in *during* the squeeze on
+  pullbacks to the 8/21 EMA, near 52-week highs, price above the 21/34 EMA,
+  EMAs 8/21/34/55/89 stacked.
+* Exits: two bars of the fading color (some sources say one). Moves typically
+  last 8–10 bars. Daily options plan: stop 2×ATR(21) on the underlying, 3-day
+  time stop, scale out 1/3 at prior highs, 1/3 at the 1.272 Fib extension,
+  trail the rest.
+* Timeframes: Carter's favorites are **daily and 30-min**, plus 195/78/39-min.
+  10-min and 60-min are not documented Simpler timeframes.
+* Options: ITM, **delta ≥ 0.70**, ≥ 5 days to expiry; stops and targets set on
+  the underlying, not on option %.
+* Performance: "about 25% of squeezes fail" (promotional, no method given).
+  No audited backtests exist. Community backtests show ~52–55% wins and a
+  profit factor of ~1.1.
+
+## The user's setup, coded (`research/qqq_stack_squeeze.py`)
+QQQ, EMAs 8>21>34>55>89 stacked + histogram light blue → long until the first
+red candle (mirror image for shorts). Options modeled as Carter's 70-delta
+ITM (30 DTE daily, 7 DTE intraday).
+
+| TF | Variant | N | Win% | Option avg | Median | ≥ +30% |
+|---|---|---|---|---|---|---|
+| daily (2001–) | long, exit first red candle | 277 | 49% | +0.3% | −2.9% | 7% |
+| daily | long, two-bar fade exit | 222 | 48% | +2.9% | −8.3% | 24% |
+| daily | long + squeeze fire, first red | 39 | 56% | +4.7% | −0.4% | 13% |
+| daily | short, any exit | 74–91 | 30–34% | −3.5% to −15% | — | — |
+| 60m (3 yrs) | long, first red | 174 | 32% | −3.2% | −3.8% | 2% |
+| 60m | long + fire, first red | 20 | 35% | +7.0% | −2.8% | 15% |
+| 10m (60 days) | all variants | 10–48 | 29–50% | about 0 | — | 0–3% |
+
+Takeaways:
+* Mechanically, the setup is about **breakeven on longs and a loser on
+  shorts**, on every timeframe tested. Nothing approaches a 30% average.
+* "Exit on the first red candle" always eats that red candle and cuts
+  winners short. Average holds are ~2 bars. The two-bar fade lets winners run
+  (24% of daily trades reach +30% on the option) but gives back more on
+  losers.
+* The one interesting cell (daily long + squeeze fire) has only 39 trades.
+  It needs out-of-sample confirmation before anyone believes it.
+* Whatever made it work when traded by hand (discretion, the 2020–21 bull
+  market, or luck) is not captured by these rules. The user's own Webull
+  order history from that period is the best evidence for which.
