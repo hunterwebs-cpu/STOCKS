@@ -384,3 +384,40 @@ April 2023), ~870 trading days. Pricing as in #6 (calibrated BS).
   before lunch, one try, $1 target/stop) needs **real option prices**
   (historical option bars via the Webull API, or a paid source like
   ThetaData/Polygon) or a live forward paper test logging real quotes.
+
+---
+
+# Findings #8: Mastering the Trade swing setups on cheap stocks (`research/mtt_swing.py`)
+
+Daily scan, 63 liquid optionable names, 2015–2026. A name is eligible only when
+its actual price was < $30 and its 20-day $ volume > $50M. **Survivorship-
+biased** (today's survivors only). Options modeled: BS with 20-day realized vol
+×1.15 (calls) / ×1.30 (puts), 30 DTE, 8% round-trip spread. Avg contract cost
+$60–250. $500 account: up to 20% of equity per trade, max 3 open, settled cash.
+
+Setup rules (research agent, public sources): Carter's squeeze options plan is
+primary (simplertrading.com/john-carter-trading-strategy-paths): near the
+52-week high, above the 21/34 MA, after 3+ squeeze dots; stop 2×ATR(21);
+3-day time stop; thirds out at new highs / +2 ATR (stand-in for the
+unspecified 1.272 Fib) / 3-day trailing low. HOLP/LOHP from secondary sources
+(ch. 17): 20-bar extreme bar, enter on a close beyond it, stop at the extreme,
+2-bar trailing stop from bar 3, trend-filtered. "Propulsion" rules not found.
+
+| Setup (calls; Carter exits) | N | Win% | Avg (70Δ / ATM) | $500 → (ATM) |
+|---|---|---|---|---|
+| Carter plan: squeeze fire near 52-wk high | 225 | 31% | −8.8% / −8.9% | $131 |
+| Carter plan: scale-in pullback near 52-wk high | 285 | 33% | −4.2% / **−2.6%** | **$1,461** (max DD −77%) |
+| Squeeze fire + stacked EMAs (no 52-wk filter) | 435 | 32% | −7.5% / −7.2% | $149 |
+| HOLP (own exits, with trend) | 1,026 | 24% | −8.4% / −8.7% | $69–177 |
+| User's stack + momentum | 1,786 | 34% | −6.3% / −6.8% | $49 |
+
+* **Puts lost in every setup.** The +30%/−50% bracket ("hit and quit") lost
+  in every setup (−7% to −19%) even with 54–58% win rates.
+* The one non-negative pocket: **Carter scale-in near the 52-week high, ATM
+  calls**: 2015–2023 mostly −10% to −49% per year, 2024 +32%, 2025 +33%,
+  2026 +22%. Halves −16.6% / +11.4%. A regime effect (2024–26 momentum
+  market), not yet a stable edge. Spread sensitivity is linear: at a 4%
+  spread the average is about +1.4%; at 15%, about −9.6%.
+* Cheap names don't fix the math. Costs per contract are small ($60–250), but
+  the spread is a bigger share of the premium, and the setups don't produce
+  big enough moves in 6–7 days to cover it.
